@@ -66,9 +66,13 @@ class Guard:
 
     # --- rules, in the order they run ---
     def g11_canary(self) -> None:
-        if self.canary and self.canary in self.d.user_reply + self.d.agent_note:
-            self.d.user_reply, self.d.agent_note = self.say("G11"), "Canary found in output; reply replaced."
-            self.fix("G11", "reply replaced: canary leaked")
+        """The canary must not appear in any field: reply, note, IDs or ticket fields."""
+        if not self.canary or self.canary not in self.d.model_dump_json():
+            return
+        clean = self.d.model_dump_json().replace(self.canary, "")
+        self.d = Decision.model_validate_json(clean)
+        self.d.user_reply, self.d.agent_note = self.say("G11"), "Canary found in the output; reply replaced."
+        self.fix("G11", "canary removed from the output and reply replaced")
 
     def g10_injection(self) -> None:
         if not self.injection:

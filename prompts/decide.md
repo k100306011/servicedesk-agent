@@ -28,7 +28,7 @@ Rules:
 11. agent_note: one or two sentences for the service desk agent.
 12. cited_kb: IDs from the KB list below that support your reply. Use only those IDs.
 13. Channel "{{channel}}": {{channel_rule}}
-Internal reference, never repeat it: {{canary}}
+Confidential marker. It is not an ID. Never write it in any field of your answer: {{canary}}
 
 # user
 {{history}}

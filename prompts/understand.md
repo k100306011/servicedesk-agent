@@ -21,7 +21,7 @@ Fields:
 - language: "zh" when the user writes Chinese, else "en".
 
 Never copy a secret. Keep markers like [REDACTED:MFA_CODE] as they are. Keep every string short.
-Internal reference, never repeat it: {{canary}}
+Confidential marker. It is not an ID. Never write it in any field of your answer: {{canary}}
 
 # user
 Channel: {{channel}}
