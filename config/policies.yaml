@@ -86,11 +86,11 @@ signals:
 
 # What each signal means, for the model's risk_signals field (prompts/understand.md).
 risk_signal_help:
-  unexpected_mfa: MFA or sign-in prompts the user did not start
+  unexpected_mfa: the user received MFA or sign-in prompts that they did not start (not for enrolling a device or a password reset that fails)
   credential_entered: the user typed a password into a suspicious page, link or form
   lost_device: a company laptop, phone or tablet is lost or stolen
   malware: a malware or virus alert
-  compromise: phishing, a suspicious link, page or pop-up asking for a secret, or a possibly hacked account
+  compromise: phishing, a suspicious link, page or pop-up asking for a secret, or signs that someone else used the account
   secret_offered: the user offers or shares a password, code or key
   security_control_disabled: the user turned off, or wants to turn off, the firewall, antivirus or endpoint protection
   privileged_access: admin, privileged, finance, payroll or production access

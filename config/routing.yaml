@@ -11,7 +11,7 @@ categories:
         when: [folder, shared drive, share, spreadsheet, a file, one file, 資料夾, 共用磁碟, 共享, 檔案]
         required_fields: [share_path, folder, exact_error, data_owner]
         approver: data owner
-    note: Privileged, admin, finance and production access goes to the application owner and needs approval. Folder access needs the data owner.
+    note: Privileged, admin, finance and production access goes to the application owner and needs approval. Folder access needs the data owner. Removing old access or reviewing a group is Access too. Access to a chat channel, meeting recording, distribution list or meeting room is Communication. An approved application missing from the software portal is Software.
     keywords:
       en: [access denied, not authorized, permission, permissions, grant, role, administrator, admin rights, global administrator, payroll, sharepoint, add me, editor, owners of, access to, onboarding, contractor]
       zh: [權限, 存取, 開通, 管理員, 財務系統, 薪資系統, 拒絕存取, 加入群組]
@@ -19,7 +19,7 @@ categories:
     team: Identity and Access Management
     kb: KB-002
     required_fields: [error, affected_username]
-    note: Never ask for or store a password or MFA code. Device changes need human identity verification.
+    note: Never ask for or store a password or MFA code. Device changes need human identity verification. A failed self-service reset, a new phone for MFA or a locked account is Identity, not Security, unless the user reports signs of attack.
     keywords:
       en: [password reset, forgot my password, reset my mfa, mfa, authenticator, locked, account locked, unlock, sign-in, login, authentication methods, new phone]
       zh: [忘記密碼, 重設密碼, 驗證碼, MFA, 驗證器, 帳號鎖住, 被鎖, 登入]
@@ -47,7 +47,7 @@ categories:
       printer:
         when: [printer, printing, 印表機, 列印]
         required_fields: [printer, location, users_affected]
-    note: Physical failures. Several users losing the same printer is a Network ticket. Never give a manual IP. A swelling battery is a safety issue.
+    note: Physical failures. Several users losing the same printer is a Network ticket. Never give a manual IP. A swelling or overheating battery is a Hardware safety case (P1) - tell the user to stop using and charging the device.
     keywords:
       en: [monitor, display, dock, docking station, printer, keyboard, battery, swelling, hardware, room controller, ip address]
       zh: [螢幕, 擴充座, 印表機, 電池, 鍵盤, 硬體]
@@ -59,7 +59,7 @@ categories:
       activation:
         when: [activation, activate, license server, licensing, license key, licence key, 啟用, 授權伺服器, 序號]
         required_fields: [product, license_server, error_code, users_affected]
-    note: Never say software is approved or licensed. Non-standard software needs a Software request with manager approval. Never put license keys in chat or tickets.
+    note: Never say software is approved or licensed. Non-standard software needs a Software request with manager approval. An approved application missing from the portal is Software. Never put license keys in chat or tickets.
     keywords:
       en: [install, software, application update, extension, browser extension, license, licence, activate, visio, software portal, diagram tool]
       zh: [安裝, 軟體, 擴充套件, 外掛, 授權, 啟用, 序號]
@@ -67,7 +67,7 @@ categories:
     team: Collaboration Services
     kb: KB-007
     required_fields: [service, affected_user_or_group, start_time, affects]
-    note: Check active incidents first. Several users and no active incident means a high-priority Collaboration incident.
+    note: Access to channels, recordings, distribution lists and rooms belongs here; the group owner approves. Check active incidents first. Several users and no active incident means a high-priority Collaboration incident.
     keywords:
       en: [email, e-mail, send email, send emails, distribution list, private channel, channel, meeting recording, recording, mailbox]
       zh: [郵件, 寄信, 寄不出, 收不到信, 信箱, 會議錄影, 頻道]
@@ -91,7 +91,7 @@ categories:
     team: End User Computing
     kb: KB-010
     required_fields: [service, impact, start_time, frequency, device_network, region, error, others_affected, session_or_pool_id]
-    note: An isolated problem gets a Performance ticket. Several users or a shared service with no active incident means an infrastructure incident for Workplace Infrastructure.
+    note: Team End User Computing when one user is affected. Team Workplace Infrastructure when several users, several regions or a shared service are affected and no active incident matches (an infrastructure incident).
     keywords:
       en: [slow, freeze, freezes, frozen, unresponsive, latency, performance, vdi, virtual desktop, lag, takes more than, build runs slowly]
       zh: [很慢, 卡住, 當機, 延遲, 效能, 虛擬桌面, 凍結]
@@ -109,7 +109,7 @@ teams: [Identity and Access Management, End User Computing, Workplace Infrastruc
 # Assumed mapping (KB uses high/medium, tickets use P1-P4). See docs/data_assessment.md, assumption A1.
 priority:
   P1: security incident, wide outage (a department or several regions) or physical safety such as a swelling battery
-  P2: several users affected, or important business work blocked now (for example production or a customer deadline)
+  P2: several users affected, or one user blocked from production work or a customer commitment within hours
   P3: single user problem or a new request (new access is normally medium priority)
   P4: no impact on work
 # First match wins (B0). Conditions are fixed names implemented in baseline.py.
