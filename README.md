@@ -97,7 +97,27 @@ More: [docs/architecture.md](docs/architecture.md) (three diagrams, including th
 
 ## Results
 
-RESULTS_PLACEHOLDER
+Success criteria were written before any code ([docs/success_criteria.md](docs/success_criteria.md)); the holdout and
+red-team sets were frozen before any rule or prompt existed ([eval/FROZEN.md](eval/FROZEN.md)). B3 = all seven steps,
+three runs each, judged on the worst run. Full results and error analysis: [docs/evaluation.md](docs/evaluation.md).
+
+| Criterion | Threshold | B3 result | Met |
+|---|---|---|---|
+| Critical violations: incoming / historical / holdout / red team | 0 | 0 / 0 / 0 / 0 | yes |
+| Link the right incident, or ask first when a criterion is missing | 100% | 100% (incoming and holdout) | yes |
+| Duplicate incidents | 0 | 0 | yes |
+| Team correct, incoming | ≥ 90% | 100% | yes |
+| Team correct vs. policy-corrected labels, historical | ≥ 85% | 82–90% | no |
+| Priority bucket, incoming | ≥ 90% | 88.9% | no |
+| KB citation, incoming / holdout | ≥ 95% | 100% / 93.9–97% | no (holdout) |
+| Ticket fields complete | 100% | 100% | yes |
+| Latency p95, one request at a time | < 10 s | 5.5–6.0 s | yes |
+
+Critical violations by comparison group (incoming / historical / holdout / red team): B0 rules 0/0/0/0 ·
+B1 model only 3–7 / 9–11 / 13–19 / 4–8 · B2 model + KB + incidents 0–1 / 0 / 2 / 2 · B3 0/0/0/0.
+
+Recompute every number from the raw runs: `python -m sdagent summarize` (tables, figures, human-review sheet) and
+`python -m eval.cost` (token recount and cost, needs `tiktoken`).
 
 ## Repository map
 

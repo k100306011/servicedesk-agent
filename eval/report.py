@@ -91,24 +91,53 @@ def table(head: list[str], rows: list[list]) -> str:
                      ["| " + " | ".join("-" if c is None else str(c) for c in r) + " |" for r in rows])
 
 
+SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]  # validated categorical slots 1-4 (light surface)
+INK, MUTED, SURFACE, GRID = "#0b0b0b", "#52514e", "#fcfcfb", "#e4e3df"
+
+
+def latest_key(per: dict, config: str, set_name: str):
+    """Final sets use tag 'final'. Dev sets use the newest tuning tag that ran this config (B0/B1 ran only in 'dev')."""
+    tags = ["final"] if set_name in ("holdout", "redteam") else DEV_TAGS[::-1]
+    return next((k for t in tags for k in per if k[:3] == (t, config, set_name)), None)
+
+
+def bars(name: str, title: str, metric_for, higher_is_better: bool) -> None:
+    fig, ax = plt.subplots(figsize=(7.2, 3.4), facecolor=SURFACE)
+    ax.set_facecolor(SURFACE)
+    width = 0.8 / len(SETS)
+    for i, s in enumerate(SETS):
+        xs, vals = [], []
+        for c, config in enumerate(CONFIGS):
+            key = latest_key(PER, config, s)
+            v = worst([m.get(metric_for(s)) for m in PER.get(key, [])], higher_is_better) if key else None
+            xs.append(c + (i - (len(SETS) - 1) / 2) * width)
+            vals.append(v)
+        drawn = ax.bar([x for x, v in zip(xs, vals) if v is not None], [v for v in vals if v is not None], width,
+                       color=SERIES[i], edgecolor=SURFACE, linewidth=1.5, label=s, zorder=3)
+        for rect, v in zip(drawn, [v for v in vals if v is not None]):
+            if v:  # label non-zero bars in text ink (the yellow and aqua slots need visible labels)
+                ax.annotate(f"{v:g}", (rect.get_x() + rect.get_width() / 2, rect.get_height()), ha="center", va="bottom",
+                            fontsize=7, color=MUTED, xytext=(0, 2), textcoords="offset points")
+    ax.set_xticks(range(len(CONFIGS)), CONFIGS, color=INK)
+    ax.tick_params(axis="y", colors=MUTED, labelsize=8)
+    ax.grid(axis="y", color=GRID, linewidth=0.8, zorder=0)
+    for side in ("top", "right", "left"):
+        ax.spines[side].set_visible(False)
+    ax.spines["bottom"].set_color(MUTED)
+    ax.set_title(title, color=INK, fontsize=11, loc="left", pad=22)
+    ax.legend(frameon=False, ncol=len(SETS), fontsize=8, loc="lower left", bbox_to_anchor=(0, 1.0), labelcolor=MUTED)
+    fig.tight_layout()
+    fig.savefig(FIG / f"{name}.png", dpi=150, facecolor=SURFACE)
+    plt.close(fig)
+
+
 def figures(per: dict, tag: str) -> None:
+    global PER
+    PER = per
     FIG.mkdir(parents=True, exist_ok=True)
-    plt.rcParams.update({"font.size": 10, "axes.spines.top": False, "axes.spines.right": False})
-    for name, metric, sets, title in (("fig1_safety", "critical_violations", SETS, "Critical violations (worst run)"),
-                                      ("fig2_team", "team_acc", ["incoming", "holdout", "redteam"], "Team correct % (worst run)")):
-        fig, ax = plt.subplots(figsize=(7, 3.2))
-        width = 0.8 / len(sets)
-        for i, s in enumerate(sets):
-            t = "final" if s in ("holdout", "redteam") else tag
-            vals = [worst([m.get(metric) for m in per.get((t, c, s, p), [])], metric != "critical_violations") or 0
-                    for c in CONFIGS for p in [next((k[3] for k in per if k[:3] == (t, c, s)), "local")]]
-            ax.bar([x + i * width for x in range(len(CONFIGS))], vals, width, label=s)
-        ax.set_xticks([x + width * (len(sets) - 1) / 2 for x in range(len(CONFIGS))], CONFIGS)
-        ax.set_title(title)
-        ax.legend(frameon=False, ncol=len(sets), fontsize=8)
-        fig.tight_layout()
-        fig.savefig(FIG / f"{name}.png", dpi=150)
-        plt.close(fig)
+    bars("fig1_safety", "Critical violations, worst run (lower is better)", lambda s: "critical_violations", False)
+    bars("fig2_team", "Team correct %, worst run (historical: policy-corrected labels)",
+         lambda s: "corrected_team_acc" if s == "historical" else "team_acc", True)
     fixes = defaultdict(int)
     for k, runs in per.items():
         if k[1] == "B3" and k[0] in (tag, "final") and runs:
@@ -116,13 +145,24 @@ def figures(per: dict, tag: str) -> None:
                 if rule.startswith("fixes:"):
                     fixes[rule[6:]] += n
     if fixes:
-        fig, ax = plt.subplots(figsize=(7, 3))
+        fig, ax = plt.subplots(figsize=(7.2, 3), facecolor=SURFACE)
+        ax.set_facecolor(SURFACE)
         rules = sorted(fixes, key=lambda r: int(r[1:]))
-        ax.bar(rules, [fixes[r] for r in rules], color="#4c72b0")
-        ax.set_title("B3: guard fixes by rule (run 1, dev + final sets)")
+        drawn = ax.bar(rules, [fixes[r] for r in rules], 0.6, color=SERIES[0], edgecolor=SURFACE, linewidth=1.5, zorder=3)
+        for rect, r in zip(drawn, rules):
+            ax.annotate(str(fixes[r]), (rect.get_x() + rect.get_width() / 2, rect.get_height()), ha="center", va="bottom",
+                        fontsize=8, color=MUTED, xytext=(0, 2), textcoords="offset points")
+        ax.grid(axis="y", color=GRID, linewidth=0.8, zorder=0)
+        for side in ("top", "right", "left"):
+            ax.spines[side].set_visible(False)
+        ax.tick_params(colors=MUTED, labelsize=9)
+        ax.set_title(f"B3 guard fixes by rule (run 1; dev tag {tag} + final sets)", color=INK, fontsize=11, loc="left")
         fig.tight_layout()
-        fig.savefig(FIG / "fig3_guard_fixes.png", dpi=150)
+        fig.savefig(FIG / "fig3_guard_fixes.png", dpi=150, facecolor=SURFACE)
         plt.close(fig)
+
+
+PER: dict = {}
 
 
 def human_review(data: dict, tag: str) -> None:

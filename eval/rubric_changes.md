@@ -24,3 +24,4 @@ Suggestions that are not applied go to the last section; scoring keeps the origi
 ## Suggestions (not applied)
 
 - **S-1 INC-1007 and INC-1009 corrected category: accept Identity or Security.** Both are unexpected-MFA cases that history routed to Security Operations. The incoming rubric accepts Security or Identity for the same situation (NEW-002), so the corrected labels are stricter than the rubric. Not applied: I saw the results before writing this suggestion, so scoring keeps the original labels.
+- **S-2 NEW-003-C `kb_any`: also accept KB-008.** The rubric allows `escalate_security` for NEW-003, and an escalation naturally cites the Security article. Found in the final holdout run, so not applied.
