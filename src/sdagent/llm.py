@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
 
 from dotenv import load_dotenv
@@ -51,8 +52,11 @@ def render(name: str, **values) -> tuple[str, str]:
     return system.replace("# system", "", 1).strip(), user.strip()
 
 
+LOG_LOCK = threading.Lock()
+
+
 class LLM:
-    def __init__(self, profile: str):
+    def __init__(self, profile: str, http_client=None):
         load_dotenv(ROOT / ".env")
         self.profile = profile
         if profile == "local":
@@ -64,18 +68,34 @@ class LLM:
             raise ValueError("the offline profile has no model")
         if not (base and key and self.model):
             raise ValueError(f"missing settings for profile '{profile}' in .env")
-        self.client = OpenAI(base_url=base, api_key=key, timeout=90, max_retries=1)
+        extra = {"http_client": http_client} if http_client is not None else {}
+        self.client = OpenAI(base_url=base, api_key=key, timeout=90, max_retries=1, **extra)
+        # Only standard OpenAI parameters are sent. Azure's newer models expect max_completion_tokens.
+        self.limit_param = "max_completion_tokens" if profile == "azure" else "max_tokens"
 
     def chat(self, messages: list[dict], response_format: dict, max_tokens: int, meta: dict) -> str:
         t0 = time.perf_counter()
         r = self.client.chat.completions.create(model=self.model, messages=messages, temperature=0,
-                                                max_tokens=max_tokens, response_format=response_format)
+                                                response_format=response_format, **{self.limit_param: max_tokens})
         meta["calls"] += 1
         meta["ms"] += int((time.perf_counter() - t0) * 1000)
         if r.usage:
             meta["prompt_tokens"] += r.usage.prompt_tokens
             meta["completion_tokens"] += r.usage.completion_tokens
-        return r.choices[0].message.content or ""
+        text = r.choices[0].message.content or ""
+        self.capture(messages, text, r.usage)
+        return text
+
+    def capture(self, messages: list[dict], text: str, usage) -> None:
+        """SDAGENT_LLM_LOG=<file>: append each call (messages, reply, usage) for token and cost analysis.
+        Never logs keys or headers; the messages are already sanitized in B0 and B3."""
+        path = os.getenv("SDAGENT_LLM_LOG")
+        if not path:
+            return
+        row = {"profile": self.profile, "model": self.model, "messages": messages, "reply": text,
+               "usage": {"prompt_tokens": getattr(usage, "prompt_tokens", 0), "completion_tokens": getattr(usage, "completion_tokens", 0)}}
+        with LOG_LOCK, open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     def structured(self, system: str, user: str, model: type[BaseModel], enums: dict | None = None,
                    max_tokens: int = 1000) -> tuple[BaseModel | None, dict]:

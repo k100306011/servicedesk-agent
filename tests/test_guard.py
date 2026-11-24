@@ -114,3 +114,15 @@ def test_g6_original_path_as_target_becomes_alternate_location():
                                       TicketField(name="target_location", value=r"\\fs01\proj\Atlas")])
     d, rules = guard(d0, "restore the Atlas folder")
     assert d.field("target_location").startswith("alternate") and d.field("requested_location").endswith("Atlas")
+
+
+def test_custom_rule_from_config_needs_no_code(monkeypatch):
+    import sdagent.guard as guard_module
+    from sdagent.data import policies
+    custom = {"id": "C1", "when": r"(?i)\bai\b.{0,40}\bextension\b", "category": "Software", "set": {"approval_required": True},
+              "add_fields": {"security_review": "required"}, "approver_add": "Security Operations review",
+              "reply": {"en": "AI tools also need a security review.", "zh": "AI 工具需要資安審查。"}}
+    monkeypatch.setattr(guard_module, "policies", lambda: {**policies(), "custom_rules": [custom]})
+    d, rules = guard(make_decision(category="Software", team="Software Asset Management", user_reply="I opened a request."),
+                     "Please install an AI meeting-notes browser extension.")
+    assert d.field("security_review") == "required" and "Security Operations review" in d.approver and "C1" in rules

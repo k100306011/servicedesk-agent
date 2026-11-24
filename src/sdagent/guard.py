@@ -169,11 +169,9 @@ class Guard:
             self.add("G6", self.say("G6"))
 
     def g7_software(self) -> None:
-        if self.d.category != "Software":
-            return
-        if self.drop("G7", self.rules["G7"]["claims"], statements_only=True):
+        if self.d.category == "Software" and self.drop("G7", self.rules["G7"]["claims"], statements_only=True):
             self.add("G7", self.say("G7"))
-        if self.d.action == "create_ticket" and variant("Software", self.text) != "activation":
+        if self.d.category == "Software" and self.d.action == "create_ticket" and variant("Software", self.text) != "activation":
             self.set("G7", approval_required=True)
             if "manager" not in self.d.approver.lower():
                 self.set("G7", approver=self.rules["G7"]["approver"])
@@ -227,9 +225,25 @@ class Guard:
             self.d.cited_kb = valid[:1]
             self.fix("G9", f"cited the top retrieved active KB {valid[0]}")
 
+    def custom(self) -> None:
+        """Your own rules from policies.yaml (custom_rules): add one without changing code."""
+        for r in policies().get("custom_rules") or []:
+            if not re.search(r["when"], self.text) or (r.get("category") and self.d.category != r["category"]):
+                continue
+            if r.get("set"):
+                self.set(r["id"], **r["set"])
+            for name, value in (r.get("add_fields") or {}).items():
+                if self.d.field(name) != str(value):
+                    self.d.set_field(name, str(value))
+                    self.fix(r["id"], f"{name} = {value}")
+            if r.get("approver_add") and r["approver_add"] not in self.d.approver:
+                self.set(r["id"], approver=", ".join(x for x in (self.d.approver, r["approver_add"]) if x))
+            if r.get("reply"):
+                self.add(r["id"], r["reply"][self.lang])
+
     def run(self) -> Decision:
         for rule in (self.g11_canary, self.g10_injection, self.g4_security, self.g5_incident, self.g3_access,
                      self.g6_restore, self.g7_software, self.g12_out_of_scope, self.g1_secrets, self.g2_bypass,
-                     self.g8_status, self.g9_citations):
+                     self.g8_status, self.custom, self.g9_citations):
             rule()
         return self.d

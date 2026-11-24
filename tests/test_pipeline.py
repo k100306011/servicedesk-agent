@@ -35,7 +35,7 @@ def test_fake_secret_never_reaches_sqlite_or_trace(db):
 class BrokenModel(LLM):
     """Looks like the OpenAI client but always answers with broken JSON."""
     def __init__(self):
-        self.profile, self.model, self.calls = "local", "fake", 0
+        self.profile, self.model, self.limit_param = "local", "fake", "max_tokens"
         create = lambda **kw: SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="{not json"))],
                                               usage=SimpleNamespace(prompt_tokens=1, completion_tokens=1))
         self.client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))

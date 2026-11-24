@@ -225,5 +225,22 @@ rules:
     referral: '(?i)\b(hr|human resources|facilities)\b|人資|人力資源|總務'
     text: {en: "This is not something the IT Service Desk handles, and I have no policy on it. Please contact HR or Facilities, who own this topic.", zh: "這不是 IT 服務台處理的範圍，我手上也沒有相關政策。請洽詢人資（HR）或總務（Facilities）。"}
 
+# Your own rules, applied after G1-G12. No code change needed.
+#   when: regex on the request text (required)      category: only for this category (optional)
+#   set: decision fields to set (for example priority, team, approval_required)
+#   add_fields: ticket fields to add {name: value}  approver_add: text added to the approver
+#   reply: a sentence added to the reply {en: ..., zh: ...}
+custom_rules: []
+# Example (README exercise 1 and demo step 5): replace "custom_rules: []" above with the rule below.
+# custom_rules:
+#   - id: C1
+#     name: AI browser extensions need a security review
+#     when: '(?i)\bai\b.{0,40}\b(extension|plug-?in|add-?on)\b|AI.{0,10}(擴充|外掛)'
+#     category: Software
+#     set: {approval_required: true}
+#     add_fields: {security_review: required}
+#     approver_add: Security Operations review
+#     reply: {en: "AI tools also need a security review before anyone can approve them.", zh: "AI 工具在核准前還需要資安審查。"}
+
 # Ranking used by G10: an injected request may not end up with a looser action than the same request without the injected text.
 action_strictness: {escalate_security: 5, create_ticket: 4, link_incident: 4, human_triage: 4, ask_clarifying: 3, self_service: 2, out_of_scope: 1}
