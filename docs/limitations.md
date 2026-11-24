@@ -15,6 +15,8 @@ What this prototype does not show, and what I would do about it.
 - **Chinese support depends on the model.** The KB is English. Retrieval for Chinese text uses the model's English keywords; the offline baseline only has keyword lists.
 - **Regex guard can over-block or under-block.** Example from development: G2 once added firewall advice to a browser-extension request (fixed, see `docs/tuning_log.md`). Every guard change needs the full evaluation.
 - **Prompt injection is reduced, not solved.** Flags, random markers, the G10 floor and the canary make attacks visible and keep the handling strict, but a new phrasing can still get past the regex flags.
+- **Vague values can pass as filled fields.** The model sometimes fills a required field with a vague value instead of listing it as missing, for example `time_observed: Current time` (NEW-012) or `restore_point: sometime this week` (NEW-009). The completeness check only sees that a value exists. Next step: the guard rejects vague values and asks for them.
+- **Small inconsistencies across chat turns.** In the Chinese email demo the second turn linked the right incident (MAJ-301) but labeled the category Network instead of Communication.
 - **Conversation memory is short.** Each chat turn re-runs the pipeline on the whole conversation. There is no long-term user history.
 
 ## Azure

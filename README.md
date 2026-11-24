@@ -123,7 +123,7 @@ Recompute every number from the raw runs: `python -m sdagent summarize` (tables,
 
 | Path | What it holds |
 |---|---|
-| `src/sdagent/` | the 7 steps, the B0 baseline, the CLI (about 1,650 lines, no file over 250) |
+| `src/sdagent/` | the 7 steps, the B0 baseline, the CLI (about 1,720 lines, no file over 250) |
 | `config/` | `routing.yaml` (categories, teams, priorities, fields, keywords) and `policies.yaml` (guard rules G1–G12) |
 | `prompts/` | `understand.md`, `decide.md`, `llm_only.md` |
 | `app/streamlit_app.py` | user chat, service desk review console, evaluation |
@@ -141,7 +141,14 @@ The main limits are in [docs/limitations.md](docs/limitations.md).
 
 ## Try a change yourself
 
-1. Add a rule: edit `config/policies.yaml`, then `python -m sdagent run --id NEW-006 --explain`.
-2. Change a priority rule in `config/routing.yaml` and re-run the evaluation: the rubric shows what breaks.
-3. Add a KB article to `data/knowledge-base/` and re-run NEW-011: retrieval picks it up at start.
-4. Compare `--profile offline` and `--profile local` on NEW-003 and NEW-012.
+1. **Add a rule without code.** In `config/policies.yaml`, replace `custom_rules: []` with the commented example below it
+   (AI browser extensions need a security review), then `python -m sdagent run --id NEW-006 --explain`.
+   The ticket gets `security_review: required` and the guard fixes list shows `C1`.
+2. **Change a priority and see what breaks.** Add a custom rule that sets new finance access to P2, then
+   `python -m sdagent eval --config B0 --set incoming --tag try --profile offline`: NEW-001 now fails its priority check,
+   because the rubric says P3. Rule changes and the rubric move together (see `eval/rubric_changes.md`).
+3. **Add a KB article.** Put `KB-013-....md` with `Status: Active` in `data/knowledge-base/` and run NEW-011 with `--explain`:
+   step 4 retrieves it (the index is rebuilt at start).
+4. **Compare rules and model.** Run NEW-003 and NEW-012 with `--profile offline` and with `--profile local`.
+5. **Add an incident in a test copy.** Copy `data/current_incidents.csv`, add a VPN incident for APAC, and point
+   `SDAGENT_INCIDENTS` at the copy: a VPN outage reported from Singapore links to it, the same report without a location asks first.

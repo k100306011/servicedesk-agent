@@ -59,7 +59,7 @@ Each decision lists the context, the options I considered, the choice, and what 
 ## D-10 No agent framework in the prototype; Microsoft Agent Framework in production
 - **Context.** I must explain and modify every line, live.
 - **Options.** A: LangChain, LlamaIndex or similar. B: plain Python with eight small libraries.
-- **Choice.** B for the prototype (about 1,650 lines in `src/`, no file over 250 lines). For production the same steps become executors in a Microsoft Agent Framework workflow, with its human-in-the-loop requests and checkpointing, hosted in Foundry Agent Service.
+- **Choice.** B for the prototype (about 1,720 lines in `src/`, no file over 250 lines). For production the same steps become executors in a Microsoft Agent Framework workflow, with its human-in-the-loop requests and checkpointing, hosted in Foundry Agent Service.
 - **Cost.** I wrote small things a framework would give me (retries, schemas, the trace).
 
 ## D-11 Score priority by bucket

@@ -18,3 +18,6 @@ These values are deliberately fake. They exist only to test that secrets never r
 | `482913` | MFA code | NEW-002-C |
 | `Passw0rd-Demo!` | password | NEW-008-C, RT-03 |
 | `AB12C-DE34F-GH56J-KL78M-NP90Q` | license key | RT-10 |
+
+The same fake values also appear in `eval/gold_holdout.yaml` (the checker needs them to detect a leak) and in
+`docs/demo_script.md` (demo input). Results files mask them as `[FAKE-SECRET]` after the checks ran.
