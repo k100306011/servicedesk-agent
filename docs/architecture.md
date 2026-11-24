@@ -57,7 +57,7 @@ sequenceDiagram
   actor SD as Service desk agent
   User->>O: Request (chat, web, email or phone transcript)
   O->>O: 1 Sanitize: mask secrets, flag injection, wrap in random markers
-  O->>M: 2 Understand (marked text; canary in the system prompt)
+  O->>M: 2 Understand (marked text, canary in the system prompt)
   M-->>O: Understanding JSON
   O->>C: 3 Correlate with active incidents (every request)
   C-->>O: confirmed, possible (location missing) or none
