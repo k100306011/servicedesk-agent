@@ -44,6 +44,23 @@ Result (B3, runs passing all checks, `dev` → `tune1`):
 - **Not fixed:** NEW-003 stays P3 in all runs.
 - Historical team vs corrected labels 78–80% → 80–86%; category 70–72% → 74–82%; priority bucket 84–86% → 78–88%. Incoming unchanged (team 100%, priority bucket 88.9%).
 
-## Round 2
+## Round 2 (last round, tag `tune1` → `tune2`)
 
-(after round 1, if needed)
+Error analysis of B3 on `tune1`: requests about the VPN token, a meeting-room controller, a VDI pool and a drive that drops at home were routed to RemoteWork or escalated; NEW-003 still P3.
+
+| Change | File |
+|---|---|
+| RemoteWork scope: VPN client, remote desktop and file transfer only; a VDI pool is Performance, a meeting-room device is Communication, a network drive that drops at home is Network | config/routing.yaml |
+| An expired token or a sign-in error gets the KB-003 steps, not an escalation | prompts/decide.md |
+| P2 wording taken from KB-001: "an existing access failure that blocks business-critical work now, such as production work or a customer commitment within hours" | config/routing.yaml |
+
+Result (B3, runs passing all checks, `tune1` → `tune2`):
+- **Fixed:** INC-1008 0→1, INC-1011 1→2, INC-1017 2→3, INC-1025 1→2, INC-1032 1→2, INC-1043 1→3, INC-1046 1→3, INC-1050 0→3.
+- **Broke:** NEW-009 3→0 (exact priority back to P1; the high/normal bucket still passes), INC-1010 2→1, INC-1019 3→2, INC-1033 3→2.
+- **Not fixed:** NEW-003 stays P3 in every run, so the incoming priority bucket stays at 88.9% (8 of 9 scored items).
+- Historical team vs corrected labels 80–86% → 82–90%; category 74–82% → 78–84%; priority bucket 78–88% → 86–90%.
+
+## After round 2
+
+No more tuning. The `tune2` configuration is the system that runs on the frozen holdout and red-team sets (tag `final`).
+Two dev criteria stay unmet and are reported as such: the historical team accuracy in the worst run (82% vs. 85%) and the incoming priority bucket (88.9% vs. 90%, NEW-003).

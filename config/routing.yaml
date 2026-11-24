@@ -27,7 +27,7 @@ categories:
     team: End User Computing
     kb: KB-003
     required_fields: [client, os, error, affected, device_managed]
-    note: Never advise turning off the firewall or endpoint protection. A failing approved client gets a RemoteWork ticket.
+    note: Never advise turning off the firewall or endpoint protection. A failing approved client gets a RemoteWork ticket. RemoteWork covers the VPN client, remote desktop to an office computer and file transfer in remote desktop. A virtual desktop (VDI) pool is Performance, a meeting-room device is Communication, and a network drive that drops at home is Network.
     keywords:
       en: [vpn, remote desktop, remote access, token expired, file transfer, clipboard, legacyconnect, gateway certificate, work from home, personal phone]
       zh: [VPN, 遠端, 遠端桌面, 連不上公司]
@@ -109,7 +109,7 @@ teams: [Identity and Access Management, End User Computing, Workplace Infrastruc
 # Assumed mapping (KB uses high/medium, tickets use P1-P4). See docs/data_assessment.md, assumption A1.
 priority:
   P1: security incident, wide outage (a department or several regions) or physical safety such as a swelling battery
-  P2: several users affected, or one user blocked from production work or a customer commitment within hours
+  P2: several users affected, or an existing access failure that blocks business-critical work now, such as production work or a customer commitment within hours (KB-001)
   P3: single user problem or a new request (new access is normally medium priority)
   P4: no impact on work
 # First match wins (B0). Conditions are fixed names implemented in baseline.py.
