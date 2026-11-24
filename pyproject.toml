@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sdagent"
+version = "0.1.0"
+description = "IT service desk triage agent prototype"
+requires-python = ">=3.11"
+dependencies = ["openai", "pydantic>=2", "pyyaml", "rank-bm25", "python-dotenv"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

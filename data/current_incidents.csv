@@ -1,0 +1,4 @@
+incident_id,service,status,priority,scope,summary,started_at
+MAJ-301,Email,investigating,P1,"EU; APAC",Outbound email delivery failures,2026-09-05T08:20:00Z
+MAJ-302,VDI,monitoring,P2,NA,Intermittent freezing in engineering VDI pool,2026-09-05T07:40:00Z
+MAJ-303,Third-floor printer,investigating,P2,HQ,Shared printer repeatedly disconnects,2026-09-05T08:00:00Z
