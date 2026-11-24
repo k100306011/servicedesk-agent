@@ -17,6 +17,11 @@ What this prototype does not show, and what I would do about it.
 - **Prompt injection is reduced, not solved.** Flags, random markers, the G10 floor and the canary make attacks visible and keep the handling strict, but a new phrasing can still get past the regex flags.
 - **Conversation memory is short.** Each chat turn re-runs the pipeline on the whole conversation. There is no long-term user history.
 
+## Azure
+- **No numbers measured on Azure.** The azure profile is implemented, contract-tested with a fake HTTP server, and shown to give the same decisions as the local profile when both point at the same server. No live Azure deployment was used, so quality, latency and cost on Azure are not measured. Token counts for Azure are estimates (recounted with `o200k_base`), not billed numbers.
+- **Model-specific parameters are not verified.** The client sends `temperature=0`, `max_completion_tokens` and a strict JSON schema. Some reasoning models reject `temperature`; the contract test checks the request shape, not each model's parameter rules.
+- **First step of a real rollout:** run the same frozen dev, holdout and red-team sets in the customer's Azure subscription and compare with the numbers here.
+
 ## Engineering
 - **Simulated tools.** SQLite stands in for the ITSM tool; there is no authentication, no real approvals and no notifications.
 - **One local model.** An open-weight 14B model on one RTX 4090. Hosted models will likely score higher; the measured quality is a floor. Latency was measured one request at a time, not under load.

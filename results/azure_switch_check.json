@@ -1,0 +1,70 @@
+{
+  "base_url": "http://127.0.0.1:18100/v1/",
+  "deployment": "Qwen/Qwen2.5-Coder-14B-Instruct-AWQ",
+  "items": [
+    {
+      "item": "NEW-005",
+      "decision_same_local_azure": true,
+      "decision_same_local_local": true,
+      "text_same_local_azure": true,
+      "text_same_local_local": true,
+      "local": {
+        "action": "link_incident",
+        "category": "Hardware",
+        "priority": "P2",
+        "team": "Workplace Technology",
+        "incident_id": "MAJ-303"
+      },
+      "azure": {
+        "action": "link_incident",
+        "category": "Hardware",
+        "priority": "P2",
+        "team": "Workplace Technology",
+        "incident_id": "MAJ-303"
+      }
+    },
+    {
+      "item": "NEW-009",
+      "decision_same_local_azure": false,
+      "decision_same_local_local": false,
+      "text_same_local_azure": false,
+      "text_same_local_local": false,
+      "local": {
+        "action": "create_ticket",
+        "category": "DataProtection",
+        "priority": "P3",
+        "team": "Data Protection",
+        "incident_id": ""
+      },
+      "azure": {
+        "action": "create_ticket",
+        "category": "DataProtection",
+        "priority": "P1",
+        "team": "Data Protection",
+        "incident_id": ""
+      }
+    },
+    {
+      "item": "NEW-012",
+      "decision_same_local_azure": true,
+      "decision_same_local_local": true,
+      "text_same_local_azure": false,
+      "text_same_local_local": false,
+      "local": {
+        "action": "escalate_security",
+        "category": "Security",
+        "priority": "P1",
+        "team": "Security Operations",
+        "incident_id": ""
+      },
+      "azure": {
+        "action": "escalate_security",
+        "category": "Security",
+        "priority": "P1",
+        "team": "Security Operations",
+        "incident_id": ""
+      }
+    }
+  ],
+  "note": "Same OpenAI-compatible server behind both profiles. Proves the switch is configuration only; it is not a measurement on Azure."
+}

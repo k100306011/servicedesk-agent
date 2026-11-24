@@ -1,0 +1,62 @@
+{
+  "requests": 242,
+  "calls": 484,
+  "calls_with_retry": 0,
+  "per_request": {
+    "qwen_in": 3295.495867768595,
+    "qwen_out": 376.38429752066116,
+    "gpt_in": 3820.4214876033056,
+    "gpt_out": 367.9669421487603,
+    "cacheable_now": 0,
+    "cacheable_reordered": 1708.0
+  },
+  "schema_tokens": {
+    "understand": 323,
+    "decide": 273
+  },
+  "shared_prefix_now": {
+    "understand": 367,
+    "decide": 326
+  },
+  "prices_checked": "2026-11-24",
+  "price_source": "https://azure.microsoft.com/en-us/pricing/details/azure-openai/",
+  "cost": {
+    "gpt-6-luna, Global": {
+      "per_request": 0.0005660256198347107,
+      "per_request_cached_prefix": 0.00041230561983471076,
+      "month_10000": 5.660256198347107,
+      "month_50000": 28.30128099173554,
+      "month_10000_cached": 4.123056198347108,
+      "month_50000_cached": 20.61528099173554
+    },
+    "gpt-6-luna, Data Zone": {
+      "per_request": 0.0006226281818181818,
+      "per_request_cached_prefix": 0.0004535361818181818,
+      "month_10000": 6.226281818181818,
+      "month_50000": 31.131409090909088,
+      "month_10000_cached": 4.535361818181818,
+      "month_50000_cached": 22.676809090909092
+    },
+    "gpt-6.2-sol, Global": {
+      "per_request": 0.011320512396694215,
+      "per_request_cached_prefix": 0.008075312396694215,
+      "month_10000": 113.20512396694215,
+      "month_50000": 566.0256198347107,
+      "month_10000_cached": 80.75312396694216,
+      "month_50000_cached": 403.7656198347108
+    },
+    "gpt-6.2-sol, Data Zone": {
+      "per_request": 0.012452563636363637,
+      "per_request_cached_prefix": 0.008882843636363635,
+      "month_10000": 124.52563636363637,
+      "month_50000": 622.6281818181818,
+      "month_10000_cached": 88.82843636363636,
+      "month_50000_cached": 444.14218181818177
+    }
+  },
+  "sources": [
+    "cost_B3_dev",
+    "final_B3",
+    "latency_B3"
+  ]
+}

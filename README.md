@@ -51,6 +51,37 @@ python -m sdagent eval --config B3 --set dev --runs 3 --profile local
 python -m sdagent summarize                                    # recompute every number from results/
 ```
 
+## Use your own Azure OpenAI deployment
+
+The Azure path is implemented and contract-tested, but this prototype was not run against a live Azure deployment.
+
+Set three values in `.env` (the endpoint is the Azure OpenAI v1 endpoint and ends with `/openai/v1/`):
+
+```bash
+AZURE_OPENAI_BASE_URL=https://<your-resource>.openai.azure.com/openai/v1/
+AZURE_OPENAI_API_KEY=<your key>
+AZURE_OPENAI_DEPLOYMENT=<your deployment name>
+```
+
+Then run the same pipeline, the same tests and the same evaluation with one switch:
+
+```bash
+python -m sdagent batch --set incoming --profile azure
+```
+
+The client is the standard OpenAI SDK: `OpenAI(base_url=AZURE_OPENAI_BASE_URL, api_key=AZURE_OPENAI_API_KEY)` with
+`model=AZURE_OPENAI_DEPLOYMENT`. Structured output tries `json_schema` first and falls back to JSON mode with validation;
+no vLLM-only parameter is sent. What was verified without Azure:
+- `tests/test_azure.py` fakes the HTTP server and checks that the request goes to `{base_url}chat/completions`,
+  that `model` is the deployment name, that the key is sent, that the response is parsed, and that the key never
+  appears in SQLite, traces, the call log or the logs.
+- `python -m eval.azure_switch` points the azure profile at the local OpenAI-compatible server and compares it with the
+  local profile on NEW-005, NEW-009 and NEW-012, with the local profile run twice as a control. Where the local profile
+  is stable, the azure profile gives the same result; where it varies (reply wording, and the priority of NEW-009),
+  it varies just as much between two local runs, because the canary and markers are random per request
+  ([results/azure_switch_check.md](results/azure_switch_check.md)).
+The first step of a real rollout is to run the same test sets in the customer's Azure subscription.
+
 ## How it works
 
 ```mermaid
