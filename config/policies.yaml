@@ -1,0 +1,225 @@
+# Guard rules and text detectors. Every rule names its KB source.
+# Patterns are Python regular expressions and cover English and Chinese.
+# guard.py applies these after the decision step. eval/checks.py uses its own, separate patterns to grade the result.
+
+security_hotline: Security Hotline
+
+# Step 1 (sanitize): secrets are masked before anything is stored or sent to the model.
+# The capture group is replaced; 'context' must also match somewhere in the text.
+redaction:
+  - type: PASSWORD
+    pattern: '(?i)\b(?:password|passwd|pwd|passphrase)\b\s*(?:is|=|:)\s*(?!(?:expired|wrong|incorrect|not|invalid|reset|locked|correct|changed|the|my|a|an|still|now|being|too)\b)["'']?([^\s"'',;]{4,})'
+  - type: PASSWORD
+    pattern: '(?:密碼|密码)\s*(?:是|為|为|=|:|：)\s*(?!錯|不|已|過期|正確)([^\s，,。;；]{4,})'
+  - type: MFA_CODE
+    pattern: '(?<![\w-])(\d{6,8})(?![\w-])'
+    context: '(?i)code|mfa|otp|passcode|verification|authenticator|驗證碼|验证码|動態碼|一次性'
+  - type: RECOVERY_CODE
+    pattern: '(?i)recovery code\W{0,3}(?:is\s+)?([A-Z0-9]{4,}(?:-[A-Z0-9]{4,})+)'
+  - type: LICENSE_KEY
+    pattern: '\b([A-Z0-9]{4,5}(?:-[A-Z0-9]{4,5}){3,5})\b'
+  - type: TOKEN
+    pattern: '\b(sk-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,})\b'
+  - type: PRIVATE_KEY
+    pattern: '(-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----)'
+
+# Step 1 (sanitize): prompt-injection phrases. A hit is flagged before the model sees the text (G10).
+injection:
+  - id: ignore_instructions
+    pattern: '(?i)\b(ignore|disregard|forget|override|bypass)\b.{0,30}\b(previous|prior|above|all|any|your|these|the)\b.{0,30}\b(instructions?|polic(y|ies)|rules|guidelines|prompts?|guardrails)\b'
+  - id: reveal_prompt
+    pattern: '(?i)\b(reveal|show|print|display|repeat|output|dump|tell me|give me)\b.{0,40}\b(hidden|system|internal|secret|your)\b.{0,20}\b(instructions?|prompts?|rules|polic(y|ies)|configuration)\b'
+  - id: force_resolve
+    pattern: '(?i)\b(mark|set|close)\b.{0,20}\b(this|the)\b.{0,15}\b(request|ticket|incident)\b.{0,20}\b(resolved|closed|done)\b|\bclose this (request|ticket) (immediately|now|without)\b'
+  - id: role_override
+    pattern: '(?im)^\s*(system|assistant|developer)\s*:|\byou are now\b.{0,30}\bmode\b|\b(admin|developer|god|jailbreak) mode\b'
+  - id: approve_all
+    pattern: '(?i)\bapprove (all|every|any)\b.{0,15}\b(requests?|tickets?|changes?)\b'
+  - id: ignore_instructions_zh
+    pattern: '(忽略|無視|忘記|忽視|不要理會).{0,10}(以上|之前|先前|所有|全部|任何).{0,6}(指示|指令|規則|政策|規定|設定)'
+  - id: reveal_prompt_zh
+    pattern: '(顯示|說出|印出|輸出|告訴我|列出|給我看).{0,10}(系統提示|隱藏(的)?(指令|規則|指示)|內部(指令|規則))|(系統提示|隱藏(的)?(指令|規則|指示)).{0,10}(印出|說出|顯示|列出|給我)'
+  - id: force_resolve_zh
+    pattern: '直接結案|(不用|不要|不經).{0,6}(工具|審核|核准).{0,6}結案|跳過.{0,4}(審核|核准|規則)'
+  - id: role_override_zh
+    pattern: '你現在是.{0,10}(管理員|系統|開發者)|管理員模式'
+
+# Signals in the user text. 'unless' cancels a hit. The guard uses them together with the model's risk_signals.
+signals:
+  unexpected_mfa:
+    - pattern: '(?i)\b(mfa|login|sign-?in|approval|authenticat\w*|verification)\b.{0,30}\b(prompts?|requests?|notifications?)\b.{0,60}\b(did not|didn''t|never)\b.{0,10}\b(start|initiate|request)'
+    - pattern: '(?i)\bunexpected\b.{0,10}\b(mfa|login|sign-?in)\b.{0,10}\b(prompts?|requests?)\b'
+    - pattern: '(非本人|不是我|不是本人|我沒有).{0,6}(發起|操作|登入|要求).{0,15}(驗證|MFA|通知|提示)'
+  credential_entered:
+    - pattern: '(?i)\b(entered|typed|submitted|put in|gave)\b.{0,25}\b(password|credentials|passcode)\b'
+      context: '(?i)phish|suspicious|fake|unexpected|delivery|notice|link|page|site|looked wrong|address'
+    - pattern: '(輸入|打了|填了|給了).{0,8}(密碼|帳密)'
+      context: '釣魚|可疑|假的|怪怪|連結|網頁|通知|網址|寄件'
+  lost_device:
+    - pattern: '(?i)\b(laptops?|phones?|devices?|tablets?|notebooks?|computers?)\b.{0,40}\b(lost|stolen|missing|misplaced)\b|\b(lost|stolen|misplaced)\b.{0,40}\b(laptops?|phones?|devices?|tablets?|notebooks?|computers?)\b'
+      unless: '(?i)\blost (access|connection|connectivity|signal|network|power)\b'
+    - pattern: '(筆電|手機|電腦|裝置|平板).{0,10}(遺失|掉了|不見|被偷|弄丟)|(遺失|弄丟|掉了|被偷).{0,10}(筆電|手機|電腦|裝置|平板)'
+  malware:
+    - pattern: '(?i)\b(malware|ransomware|trojan|virus|quarantined|infected)\b'
+      unless: '(?i)\banti-virus\b'
+    - pattern: '惡意程式|勒索|中毒|木馬|病毒'
+  compromise:
+    - pattern: '(?i)\b(phishing|phish|compromised|hacked|account takeover)\b'
+    - pattern: '(?i)\bsuspicious\b.{0,20}\b(link|email|e-mail|page|site|tab|sign-?in|login|message|attachment)'
+    - pattern: '(?i)\b(pop-?up|unknown (app|application)|website|web page)\b.{0,40}\b(asks?|asking|requests?|wants?)\b.{0,30}\b(recovery code|password|mfa code|verification code)\b'
+    - pattern: '釣魚|被駭|帳號被盜|被盜用|可疑(的)?(連結|網頁|信|郵件|登入)'
+  secret_offered:
+    - pattern: '(?i)\b(can|could|will|happy to|want me to)\b.{0,15}\b(provide|share|send|give|read out)\b.{0,30}\b(code|password|key|otp|passcode)\b'
+    - pattern: '(可以|能|要不要).{0,6}(提供|給你|傳給你|告訴你).{0,10}(驗證碼|密碼|金鑰|序號)'
+  privileged_access:
+    - pattern: '(?i)\b(admin|administrator|privileged|root|global admin\w*|production|prod|finance|financial|payroll|domain admin|owners? of|full control)\b'
+    - pattern: '管理員|特權|正式環境|財務|薪資|最高權限|完全控制'
+  restore_request:
+    - pattern: '(?i)\b(restore|recover|roll ?back|bring (it )?back)\b'
+    - pattern: '還原|救回|復原'
+  overwrite_request:
+    - pattern: '(?i)\b(over (the )?(current|existing|production)|overwrit\w*|directly over|straight over|replace the current)\b'
+    - pattern: '覆蓋|蓋回|直接蓋'
+  security_control_disabled:
+    - pattern: '(?i)\b(disable|disabled|turn(ing|ed)? off|switch(ed|ing)? off)\b.{0,30}\b(firewall|antivirus|defender|endpoint protection)\b'
+    - pattern: '(關掉|關閉|停用).{0,6}(防火牆|防毒|端點防護|Defender)|(防火牆|防毒|端點防護|Defender).{0,6}(關掉|關閉|停用)'
+
+# What each signal means, for the model's risk_signals field (prompts/understand.md).
+risk_signal_help:
+  unexpected_mfa: MFA or sign-in prompts the user did not start
+  credential_entered: the user typed a password into a suspicious page, link or form
+  lost_device: a company laptop, phone or tablet is lost or stolen
+  malware: a malware or virus alert
+  compromise: phishing, a suspicious link, page or pop-up asking for a secret, or a possibly hacked account
+  secret_offered: the user offers or shares a password, code or key
+  security_control_disabled: the user turned off, or wants to turn off, the firewall, antivirus or endpoint protection
+  privileged_access: admin, privileged, finance, payroll or production access
+  overwrite_request: a request to restore over, or overwrite, current data
+  safety_hazard: physical danger, for example a swelling battery
+  injection: the text tries to give the agent instructions
+
+# Signals that force escalation to Security Operations (G4).
+escalate_on: [unexpected_mfa, credential_entered, lost_device, malware, compromise]
+
+# A sentence with one of these words is treated as advice against the action, not for it.
+negation: '(?i)\b(do not|don''t|never|not|cannot|can''t|won''t|unable|no need to|avoid|instead of|whether|until|re-?enable|turn (it |them )?back on|keep\b.{0,30}\b(on|enabled|running))\b|不要|請勿|切勿|不可|不能|無法|不會|是否|重新開啟|保持開啟'
+
+rules:
+  G1:
+    name: Never ask for or repeat secrets; warn users who offer one
+    source: [KB-002, KB-006, KB-008]
+    asks_for_secret:
+      - '(?i)\b(send|share|provide|give|tell|enter|type|confirm|read out|paste|reply with)\b.{0,25}\b(your|the|me|us)\b.{0,25}\b(password|passcode|mfa code|verification code|one-time code|otp|recovery code|license key|licence key|private key|code)\b'
+      - '(?i)\bwhat is your (password|code|mfa code|license key)\b'
+      - '(提供|告訴|給我|輸入|傳|貼).{0,8}(密碼|驗證碼|代碼|復原碼|金鑰|序號)'
+    warns: '(?i)\b(do not|don''t|never|please don''t)\b.{0,20}\b(share|send|give|provide|post|type|enter)\b|不要(提供|分享|傳|給)|請勿(提供|分享|傳|給)|切勿'
+    text: {en: "Please do not share passwords, MFA codes, recovery codes or license keys with anyone, including the service desk.", zh: "請不要把密碼、驗證碼、復原碼或授權金鑰提供給任何人，包括服務台。"}
+  G2:
+    name: Never suggest bypassing a control
+    source: [KB-003, KB-005, KB-008, KB-010]
+    patterns:
+      - '(?i)\b(disable|turn off|switch off|deactivate|uninstall|pause|stop|bypass|exclude)\b.{0,40}\b(firewall|antivirus|anti-virus|defender|endpoint protection|edr|security software|compliance|certificate (validation|check))'
+      - '(?i)\b(set|assign|enter|use|configure|type|add)\b.{0,30}\b(manual|static)\b.{0,10}\bip\b'
+      - '(?i)\bip address (is|=|:)\s*\d'
+      - '\b\d{1,3}(?:\.\d{1,3}){3}\b'
+      - '(?i)\b(restart|reboot)\b.{0,25}\b(several|multiple|repeatedly|a few|many) times\b|\bkeep (restarting|rebooting)\b'
+      - '(?i)\b(edit|change|modify|tweak)\b.{0,25}\bregistry\b|\bregedit\b|\bregistry (setting|key|value)\b'
+      - '(?i)\b(increase|add|allocate|raise)\b.{0,20}\b(ram|memory|cpu|resources)\b'
+      - '(關掉|關閉|停用|暫停|移除|解除安裝).{0,10}(防火牆|防毒|Defender|端點防護|安全軟體|合規|憑證驗證)'
+      - '(防火牆|防毒|Defender|端點防護|安全軟體).{0,6}(關掉|關閉|停用|暫停|移除)'
+      - '(手動|自行).{0,6}(設定|輸入|指定).{0,6}IP|IP\s*(位址)?\s*(是|設成|設為)\s*\d'
+      - '(修改|編輯|改).{0,4}(登錄檔|機碼)'
+    text: {en: "Keep the firewall and endpoint protection turned on. The service desk will troubleshoot the approved setup with you.", zh: "請保持防火牆和端點防護開啟，服務台會協助你用核准的設定排除問題。"}
+  G3:
+    name: Access needs the owner's approval (application owner for privileged, admin, finance and production; data owner for folders)
+    source: [KB-001, KB-004]
+    claims_granted:
+      - '(?i)\b(i|we)\b.{0,10}\b(have |''ve )?(granted|added|given|enabled|provisioned|unlocked|reset)\b.{0,30}\b(you|your|access|rights|role|permissions?|mfa|account)\b'
+      - '(?i)\byou (now )?have (been given |been granted )?(access|admin|the role|permissions?)\b'
+      - '(?i)\baccess (has been|is now|was) (granted|given|enabled|added)\b'
+      - '(已經|已)(幫你|為你)?(開通|開好|授權|加入|開啟|重設)'
+    grant_before_approval:
+      - '(?i)\b(grant|add|give|enable|provision)\b.{0,40}\b(now|first|immediately|right away|temporarily)\b.{0,60}\bapprov\w*\b.{0,20}\b(later|afterwards|after)\b'
+      - '(?i)\bapprov\w*\b.{0,20}\b(later|afterwards)\b'
+      - '先.{0,6}(開|給|加).{0,15}(之後|再|後).{0,6}補'
+    approver: application owner
+    folder_approver: data owner
+    text: {en: "This access needs approval from the application owner before anything changes. I cannot grant it now.", zh: "這個權限要先經過系統負責人核准才能開通，我現在不能直接開給你。"}
+    folder_text: {en: "Folder permissions change only with the data owner's approval, so I sent the request to the data owner.", zh: "資料夾權限要經過資料負責人核准才能調整，我已經把申請送給資料負責人。"}
+  G4:
+    name: Security signals always go to Security Operations at P1
+    source: [KB-002, KB-008]
+    hotline: '(?i)security hotline|資安專線|資安熱線'
+    promises_safe:
+      - '(?i)\b(your|the|this)\b.{0,20}\b(account|device|laptop|computer|phone|pc|machine|system)\b.{0,15}\b(is|are|looks|seems|should be)\b.{0,10}\b(now )?(safe|secure|clean|fine|ok|okay|not compromised)\b'
+      - '(?i)\b(no|nothing)\b.{0,10}\b(sign of )?(compromise|threat|to worry)\b'
+      - '(?i)\b(you are|you''re) (safe|fine) now\b|\b(ensure|make sure) (that )?(your|the) (account|device|laptop|computer) is (safe|secure)\b'
+      - '(帳號|電腦|筆電|裝置|手機).{0,6}(現在)?(是|已經|很)?(安全|沒事|沒有問題|沒問題)'
+    delete_evidence:
+      - '(?i)\b(delete|remove|clear|erase|wipe|purge)\b.{0,25}\b(email|e-mail|message|mail|alert|history|logs?|evidence|notification)s?\b'
+      - '(刪除|刪掉|清除|清空).{0,6}(信|郵件|訊息|警告|紀錄|通知|證據)'
+    text: {en: "This may be a security incident. Please stop using the suspicious content and contact the Security Hotline now. I opened a high-priority case for Security Operations.", zh: "這可能是資安事件。請先停止操作可疑的內容，並立刻聯絡 Security Hotline（資安專線）。我已經開了一張高優先的資安單給 Security Operations。"}
+  G5:
+    name: Shared services check active incidents first; no duplicates
+    source: [KB-007, KB-010, KB-012]
+    link_text: {en: "This matches active incident {incident_id} ({summary}). Current status: {status}. I linked your request to it, so you get its updates. There is no need to open a new ticket.", zh: "這和處理中的事件 {incident_id}（{summary}）相符，目前狀態：{status}。我已經把你的請求連到這個事件，之後會收到更新，不需要再開新單。"}
+    asks:
+      location: '(?i)\b(which|what)\b.{0,15}\b(office|location|site|region|city|country)\b|\bwhere are you\b|哪(個|裡|一個)?.{0,3}(辦公室|地點|城市|區域|國家)|在哪'
+      pool_or_region: '(?i)\b(which|what)\b.{0,15}\b(pool|region)\b|哪(個|一個)?.{0,3}(pool|區域)|資源池'
+    ask_text:
+      location: {en: "This may be part of active incident {incident_id} ({summary}, scope {scope}). Which office or region are you in? Then I can link your request to it.", zh: "這可能是處理中的事件 {incident_id}（{summary}，影響範圍 {scope}）。請問你在哪個辦公室或區域？確認後我就把你的請求連過去。"}
+      pool_or_region: {en: "This may be part of active incident {incident_id} ({summary}, scope {scope}). Which VDI pool and region are you on? Then I can link your request to it.", zh: "這可能是處理中的事件 {incident_id}（{summary}，影響範圍 {scope}）。請問你用的是哪個 VDI pool、在哪個區域？確認後我就把你的請求連過去。"}
+  G6:
+    name: Restore to an alternate location with owner approval; never claim success
+    source: [KB-009]
+    agrees_to_overwrite:
+      - '(?i)\b(restore|put|copy|recover)\b.{0,40}\b(over|on top of)\b.{0,20}\b(the )?(current|existing|production|live)\b'
+      - '(?i)\b(i|we)\b.{0,15}\b(will|''ll|can)\b.{0,15}\b(overwrite|replace)\b'
+      - '覆蓋|蓋過|蓋回'
+    claims_restored:
+      - '(?i)\b(has been|was|is now|have been)\b.{0,10}\b(restored|recovered)\b|\b(i|we)\b.{0,10}\b(have |''ve )?(restored|recovered)\b|\brestore (is |was )?(complete|completed|successful|done)\b'
+      - '(已經|已)(還原|復原|救回)'
+    target_location: alternate location (no overwrite)
+    approver: data owner
+    text: {en: "We restore to an alternate location by default, so current data is not overwritten. The data owner must approve, and the restore counts as done only after the owner checks the files.", zh: "我們預設還原到另一個位置，不會覆蓋目前的資料。需要資料負責人核准，而且要等負責人確認檔案沒問題，才算還原完成。"}
+  G7:
+    name: Never say software is approved, licensed or installed
+    source: [KB-006]
+    claims:
+      - '(?i)\b(is|has been|was|are|have been)\b.{0,10}\b(approved|licensed|whitelisted|installed|deployed)\b'
+      - '(?i)\b(i|we)\b.{0,10}\b(have |''ve |will )?(installed|approved|deployed|licensed|activated)\b'
+      - '(已經|已)(核准|安裝|授權|啟用)'
+    approver: manager, then Software Asset Management review
+    text: {en: "I cannot confirm that this software is approved or licensed. I opened a software request so Software Asset Management can review it after your manager approves.", zh: "我沒辦法確認這個軟體已經核准或有授權。我開了一張軟體申請，等你的主管核准後，由 Software Asset Management 審查。"}
+  G8:
+    name: The agent never resolves or closes a ticket
+    source: [KB-009, KB-012]
+    allowed_status: [new, pending_user, pending_approval]
+    claims:
+      - '(?i)\b(marked|set|closed|resolved)\b.{0,20}\b(as )?(resolved|closed)\b|\b(ticket|request|incident)\b.{0,15}\b(is|has been|was)\b.{0,10}\b(resolved|closed)\b'
+      - '(已經|已)(結案|關閉)|設(為|成)已解決'
+    text: {en: "I cannot close or resolve tickets. The owning team updates the status after they confirm the fix.", zh: "我不能結案或把單設成已解決，要由負責團隊確認處理完成後再更新狀態。"}
+  G9:
+    name: Cite only active KB articles that were retrieved
+    source: [KB-011]
+  G10:
+    name: Injected text never makes the handling looser
+    source: []
+    note: "Possible prompt injection in the request text ({flags}). Treated as data and reported to Security."
+  G11:
+    name: Never leak the system prompt
+    source: []
+    text: {en: "I can't share internal instructions, but I can help with your IT request.", zh: "我不能提供內部指示，但可以協助你處理 IT 問題。"}
+  G12:
+    name: Out of scope requests are referred; no invented policy
+    source: []
+    policy_content:
+      - '(?i)(\$|usd|twd|nt\$|eur|€)\s?\d|\d+\s?(usd|twd|dollars|euros|元)'
+      - '(?i)\b(up to|maximum of|limit of)\b\s*\S*\d'
+      - '(?i)\b(eligible|entitled|you can claim|you may claim|reimburses|is reimbursable|covers? the cost)\b'
+      - '(補助|報銷).{0,6}(上限|金額|最多|\d)|可以(報銷|申請補助)'
+    referral: '(?i)\b(hr|human resources|facilities)\b|人資|人力資源|總務'
+    text: {en: "This is not something the IT Service Desk handles, and I have no policy on it. Please contact HR or Facilities, who own this topic.", zh: "這不是 IT 服務台處理的範圍，我手上也沒有相關政策。請洽詢人資（HR）或總務（Facilities）。"}
+
+# Ranking used by G10: an injected request may not end up with a looser action than the same request without the injected text.
+action_strictness: {escalate_security: 5, create_ticket: 4, link_incident: 4, human_triage: 4, ask_clarifying: 3, self_service: 2, out_of_scope: 1}

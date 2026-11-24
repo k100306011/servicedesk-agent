@@ -1,0 +1,200 @@
+# Routing table: categories, teams, priorities, required fields and keywords.
+# Change behaviour here without touching code. Sources: KB owners and the most common historical team.
+
+categories:
+  Access:
+    team: Identity and Access Management
+    kb: KB-001
+    required_fields: [application, requested_role, business_reason, manager_approval]
+    variants:
+      folder_access:
+        when: [folder, shared drive, share, spreadsheet, a file, one file, 資料夾, 共用磁碟, 共享, 檔案]
+        required_fields: [share_path, folder, exact_error, data_owner]
+        approver: data owner
+    note: Privileged, admin, finance and production access goes to the application owner and needs approval. Folder access needs the data owner.
+    keywords:
+      en: [access denied, not authorized, permission, permissions, grant, role, administrator, admin rights, global administrator, payroll, sharepoint, add me, editor, owners of, access to, onboarding, contractor]
+      zh: [權限, 存取, 開通, 管理員, 財務系統, 薪資系統, 拒絕存取, 加入群組]
+  Identity:
+    team: Identity and Access Management
+    kb: KB-002
+    required_fields: [error, affected_username]
+    note: Never ask for or store a password or MFA code. Device changes need human identity verification.
+    keywords:
+      en: [password reset, forgot my password, reset my mfa, mfa, authenticator, locked, account locked, unlock, sign-in, login, authentication methods, new phone]
+      zh: [忘記密碼, 重設密碼, 驗證碼, MFA, 驗證器, 帳號鎖住, 被鎖, 登入]
+  RemoteWork:
+    team: End User Computing
+    kb: KB-003
+    required_fields: [client, os, error, affected, device_managed]
+    note: Never advise turning off the firewall or endpoint protection. A failing approved client gets a RemoteWork ticket.
+    keywords:
+      en: [vpn, remote desktop, remote access, token expired, file transfer, clipboard, legacyconnect, gateway certificate, work from home, personal phone]
+      zh: [VPN, 遠端, 遠端桌面, 連不上公司]
+  Network:
+    team: Workplace Infrastructure
+    kb: KB-004
+    required_fields: [share_path, exact_error, other_folders_accessible]
+    note: Connectivity or drive mapping failures. A single denied folder is Access, not Network.
+    keywords:
+      en: [network drive, mapped drive, drive mapping, department drive, share path, network, wifi, wi-fi, prompts repeatedly for credentials]
+      zh: [網路磁碟, 網路, 對應磁碟, 連線中斷]
+  Hardware:
+    team: Workplace Technology
+    kb: KB-005
+    required_fields: [device, dock_model, monitor_model]
+    variants:
+      printer:
+        when: [printer, printing, 印表機, 列印]
+        required_fields: [printer, location, users_affected]
+    note: Physical failures. Several users losing the same printer is a Network ticket. Never give a manual IP. A swelling battery is a safety issue.
+    keywords:
+      en: [monitor, display, dock, docking station, printer, keyboard, battery, swelling, hardware, room controller, ip address]
+      zh: [螢幕, 擴充座, 印表機, 電池, 鍵盤, 硬體]
+  Software:
+    team: Software Asset Management
+    kb: KB-006
+    required_fields: [product, business_reason, manager_approval, requested_duration]
+    variants:
+      activation:
+        when: [activation, activate, license server, licensing, license key, licence key, 啟用, 授權伺服器, 序號]
+        required_fields: [product, license_server, error_code, users_affected]
+    note: Never say software is approved or licensed. Non-standard software needs a Software request with manager approval. Never put license keys in chat or tickets.
+    keywords:
+      en: [install, software, application update, extension, browser extension, license, licence, activate, visio, software portal, diagram tool]
+      zh: [安裝, 軟體, 擴充套件, 外掛, 授權, 啟用, 序號]
+  Communication:
+    team: Collaboration Services
+    kb: KB-007
+    required_fields: [service, affected_user_or_group, start_time, affects]
+    note: Check active incidents first. Several users and no active incident means a high-priority Collaboration incident.
+    keywords:
+      en: [email, e-mail, send email, send emails, distribution list, private channel, channel, meeting recording, recording, mailbox]
+      zh: [郵件, 寄信, 寄不出, 收不到信, 信箱, 會議錄影, 頻道]
+  Security:
+    team: Security Operations
+    kb: KB-008
+    required_fields: [description, affected_device_or_account, time_observed, actions_taken]
+    note: Security Operations decides containment, credential reset and closure. Tell the user to contact the Security Hotline.
+    keywords:
+      en: [phishing, suspicious, malware, virus, quarantined, compromised, lost, stolen, missing, security alert, recovery code, hacked, fake]
+      zh: [釣魚, 可疑, 惡意程式, 病毒, 遺失, 被偷, 不見, 資安, 被盜]
+  DataProtection:
+    team: Data Protection
+    kb: KB-009
+    required_fields: [restore_scope, target_location, restore_point, data_owner, approval]
+    note: Restore to an alternate location by default, with data-owner approval. Never claim a restore succeeded.
+    keywords:
+      en: [restore, backup, deleted, recover, overwrite, restore job, restore browser]
+      zh: [還原, 備份, 刪除, 刪掉, 救回, 覆蓋, 誤刪]
+  Performance:
+    team: End User Computing
+    kb: KB-010
+    required_fields: [service, impact, start_time, frequency, device_network, region, error, others_affected, session_or_pool_id]
+    note: An isolated problem gets a Performance ticket. Several users or a shared service with no active incident means an infrastructure incident for Workplace Infrastructure.
+    keywords:
+      en: [slow, freeze, freezes, frozen, unresponsive, latency, performance, vdi, virtual desktop, lag, takes more than, build runs slowly]
+      zh: [很慢, 卡住, 當機, 延遲, 效能, 虛擬桌面, 凍結]
+
+# Exceptions to the default team. Conditions are fixed names implemented in baseline.py.
+team_exceptions:
+  - {category: Identity, if: security_signal, team: Security Operations}
+  - {category: RemoteWork, if: security_signal, team: Security Operations}
+  - {category: Hardware, variant: printer, if: multi_user, category_to: Network, team: Workplace Infrastructure}
+  - {category: Performance, if: multi_user_no_incident, team: Workplace Infrastructure}
+
+teams: [Identity and Access Management, End User Computing, Workplace Infrastructure, Workplace Technology,
+        Software Asset Management, Collaboration Services, Security Operations, Data Protection]
+
+# Assumed mapping (KB uses high/medium, tickets use P1-P4). See docs/data_assessment.md, assumption A1.
+priority:
+  P1: security incident, wide outage (a department or several regions) or physical safety such as a swelling battery
+  P2: several users affected, or important business work blocked now (for example production or a customer deadline)
+  P3: single user problem or a new request (new access is normally medium priority)
+  P4: no impact on work
+# First match wins (B0). Conditions are fixed names implemented in baseline.py.
+priority_rules:
+  - {if: security_signal, priority: P1}
+  - {if: safety_hazard, priority: P1}
+  - {if: wide_outage, priority: P1}
+  - {if: multi_user, priority: P2}
+  - {if: blocks_critical_work, priority: P2}
+  - {if: no_work_impact, priority: P4}
+  - {priority: P3}
+
+signals:
+  multi_user:
+    en: [everyone, everybody, nobody, several people, several users, multiple users, many users, whole team, the team, our department, at least four, four or more, five teammates, all the users, all of us, none of us, twelve users, several senders, users in, of us]
+    zh: [所有人, 每個人, 大家, 多人, 整個部門, 我們部門, 好幾個人, 至少有四個人, 都有一樣的問題]
+  wide_outage:
+    en: [department, several regions, multiple regions, europe and apac, everyone in the company]
+    zh: [整個部門, 我們部門, 多個區域]
+  safety_hazard:
+    en: [swelling, swollen, overheating, smoke, burning smell, bottom case is separating]
+    zh: [膨脹, 過熱, 冒煙, 燒焦]
+  blocks_critical_work:
+    en: [production, customer call, customer meeting, customer, deadline, cannot work, blocked]
+    zh: [正式環境, 客戶, 截止, 無法工作]
+  no_work_impact:
+    en: [not urgent, when you have time, cosmetic, only one of two monitors]
+    zh: [不急, 有空再]
+
+# Incident matching (KB-012): service, symptom, location and time window.
+incidents:
+  active_statuses: [investigating, identified, monitoring]
+  window_hours_before: 2
+  window_hours_after: 72
+  services:
+    Email: [email, e-mail, emails, mail, outlook, 郵件, 寄信, 信件, 收信, 寄不出]
+    VDI: [vdi, virtual desktop, 虛擬桌面, 雲端桌面]
+    Printer: [printer, printing, 印表機, 列印]
+    VPN: [vpn, remote access, 遠端連線]
+    Portal: [employee portal, portal]
+  symptoms:
+    - [send, sending, outbound, delivery, deliver, bounce, 寄不出, 寄信, 發信, 寄出]
+    - [freeze, freezes, freezing, frozen, unresponsive, hang, hangs, stuck, 卡住, 當機, 凍結, 沒回應]
+    - [offline, disconnect, disconnects, disconnected, drops, drop off, 斷線, 離線]
+    - [slow, latency, lag, takes more than, 很慢, 延遲]
+    - [down, outage, unavailable, not working, cannot connect, 掛了, 無法使用, 連不上]
+  locations:
+    APAC: [apac, asia, singapore, tokyo, sydney, hong kong, taipei, seoul, 新加坡, 東京, 香港, 台北, 臺北, 亞太]
+    EU: [eu, europe, london, paris, berlin, frankfurt, dublin, amsterdam, 歐洲, 倫敦, 巴黎]
+    NA: [north america, new york, seattle, toronto, chicago, boston, 北美, 紐約, 西雅圖]
+    HQ: [hq, headquarters, head office, 總部]
+  # Words that point at the exact asset named in an incident (assumption A3).
+  assets:
+    third floor: [third-floor, third floor, 3rd floor, 3f, 三樓]
+    engineering: [engineering pool, engineering vdi, engineering, 工程]
+
+out_of_scope:
+  en: [reimburse, reimbursement, ergonomic, chair, furniture, salary, leave balance, vacation, parking, canteen, benefits, allowance, expense claim]
+  zh: [報銷, 補助, 椅子, 人體工學, 薪水, 請假, 休假, 停車, 福利, 津貼]
+  referral: HR or Facilities
+
+# Chat and web can ask now. Email and phone transcripts cannot, so the agent opens a ticket
+# that waits for the user and sends the question (assumption A4).
+async_channels: [email, phone_transcript]
+
+retrieval:
+  kb_top_k: 3
+  kb_min_score: 1.0   # calibrated on the 12 incoming requests: NEW-011 tops at 0.57, NEW-006 at 1.96
+  precedents_k: 3
+
+# Clock for chat requests, so the demo matches the incident snapshot.
+demo_clock: "2026-09-05T09:00:00Z"
+
+# Approver when a ticket in this category needs approval. G3, G6 and G7 can make it stricter.
+approvals:
+  Access: manager
+  Software: manager, then Software Asset Management review
+  DataProtection: data owner
+
+# Template replies for B0 (no model) and for the guard when it rebuilds a reply.
+replies:
+  create_ticket: {en: "I created a {category} ticket for {team}.", zh: "我已經建立一張 {category} 單，交給 {team}。"}
+  incident_ticket: {en: "Several users are affected and there is no active incident for this, so I opened a high-priority incident for {team}.", zh: "這影響多位使用者，而且目前沒有相關的處理中事件，所以我開了一張高優先的事件單給 {team}。"}
+  needs_approval: {en: "It needs approval from the {approver} before anything changes.", zh: "需要 {approver} 核准後才會處理。"}
+  missing: {en: "To complete it, please send: {missing}.", zh: "請補充以下資訊：{missing}。"}
+  reference: {en: "Reference: {kb}.", zh: "參考：{kb}。"}
+  ask_generic: {en: "Can you tell me more: which system or device, the exact error, and since when?", zh: "可以多告訴我一些嗎？是哪個系統或設備、錯誤訊息是什麼、從什麼時候開始？"}
+  human_triage: {en: "I passed your request to a service desk agent, who will get back to you.", zh: "我已經把你的請求轉給服務台人員，他們會再跟你聯絡。"}
