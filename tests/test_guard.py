@@ -105,3 +105,12 @@ def test_g11_canary_leak_replaces_reply(lang):
 def test_g12_out_of_scope_is_referred_without_policy(lang, text, reply):
     d, rules = guard(make_decision(action="self_service", category="none", team="none", user_reply=reply), text, lang, kb=())
     assert d.action == "out_of_scope" and "300" not in d.user_reply and ("HR" in d.user_reply) and "G12" in rules
+
+
+def test_g6_original_path_as_target_becomes_alternate_location():
+    from sdagent.models import TicketField
+    d0 = make_decision(category="DataProtection", team="Data Protection", user_reply="We will restore it.",
+                       ticket_fields=[TicketField(name="restore_scope", value=r"\\fs01\proj\Atlas"),
+                                      TicketField(name="target_location", value=r"\\fs01\proj\Atlas")])
+    d, rules = guard(d0, "restore the Atlas folder")
+    assert d.field("target_location").startswith("alternate") and d.field("requested_location").endswith("Atlas")

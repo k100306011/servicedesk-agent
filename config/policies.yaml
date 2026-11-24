@@ -163,6 +163,10 @@ rules:
     name: Shared services check active incidents first; no duplicates
     source: [KB-007, KB-010, KB-012]
     link_text: {en: "This matches active incident {incident_id} ({summary}). Current status: {status}. I linked your request to it, so you get its updates. There is no need to open a new ticket.", zh: "這和處理中的事件 {incident_id}（{summary}）相符，目前狀態：{status}。我已經把你的請求連到這個事件，之後會收到更新，不需要再開新單。"}
+    status_words:
+      investigating: [investigating, 調查]
+      monitoring: [monitoring, 監控, 觀察]
+      identified: [identified, 已找到原因]
     asks:
       location: '(?i)\b(which|what)\b.{0,15}\b(office|location|site|region|city|country)\b|\bwhere are you\b|哪(個|裡|一個)?.{0,3}(辦公室|地點|城市|區域|國家)|在哪'
       pool_or_region: '(?i)\b(which|what)\b.{0,15}\b(pool|region)\b|哪(個|一個)?.{0,3}(pool|區域)|資源池'

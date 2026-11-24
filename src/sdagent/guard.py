@@ -102,21 +102,30 @@ class Guard:
             self.add("G4", self.say("G4"), "added Security Hotline instruction")
 
     def g5_incident(self) -> None:
+        """Confirmed match: link, give the status, no new incident. Possible match: ask first (success criteria)."""
         c, r = self.corr, self.rules["G5"]
         if self.d.action == "escalate_security":
             return
+        inc = c.incident
+        values = {"incident_id": c.incident_id, "summary": inc.get("summary", ""), "status": inc.get("status", ""),
+                  "scope": inc.get("scope", "")}
         if c.status == "confirmed":
-            self.set("G5", action="link_incident", incident_id=c.incident_id, priority=c.incident["priority"])
-            if c.incident_id not in self.d.user_reply:
-                self.add("G5", r["link_text"][self.lang].format(incident_id=c.incident_id, summary=c.incident["summary"],
-                                                                status=c.incident["status"]), "added incident status")
+            rebuild = self.d.action != "link_incident"
+            self.set("G5", action="link_incident", incident_id=c.incident_id, priority=inc["priority"])
+            status_words = r["status_words"].get(inc["status"], [inc["status"]])
+            if rebuild:
+                self.d.user_reply = r["link_text"][self.lang].format(**values)
+                self.fix("G5", "reply rebuilt for the incident link")
+            elif c.incident_id not in self.d.user_reply or not any(w in self.d.user_reply.lower() for w in status_words):
+                self.add("G5", r["link_text"][self.lang].format(**values), "added incident status")
         elif c.status == "possible":
-            if self.d.action not in ("ask_clarifying", "link_incident"):
-                self.set("G5", action="ask_clarifying", incident_id=c.incident_id)
             need = c.missing[0]
-            if self.d.action == "ask_clarifying" and not re.search(r["asks"][need], self.d.user_reply):
-                self.add("G5", r["ask_text"][need][self.lang].format(incident_id=c.incident_id, summary=c.incident["summary"],
-                                                                     scope=c.incident["scope"]), "added the missing-criterion question")
+            if self.d.action != "ask_clarifying":
+                self.set("G5", action="ask_clarifying", incident_id=c.incident_id)
+                self.d.user_reply = r["ask_text"][need][self.lang].format(**values)
+                self.fix("G5", "reply rebuilt to ask for the missing match criterion")
+            elif not re.search(r["asks"][need], self.d.user_reply):
+                self.add("G5", r["ask_text"][need][self.lang].format(**values), "added the missing-criterion question")
         elif self.d.action == "create_ticket" and hits(self.text, routing()["signals"]["multi_user"]) \
                 and self.d.priority in ("P3", "P4"):
             self.set("G5", priority="P2")
@@ -145,7 +154,9 @@ class Guard:
         if self.d.category != "DataProtection" or self.d.action not in ("create_ticket", "ask_clarifying"):
             return
         target = self.d.field("target_location")
-        if not target or re.search(r"(?i)over|current|existing|production|覆蓋", target):
+        if not re.search(r"(?i)alternate|替代|另一個位置", target):  # a real path here may be the original folder
+            if target:
+                self.d.set_field("requested_location", target)
             self.d.set_field("target_location", r["target_location"])
             self.fix("G6", f"target_location: {target or '(empty)'} -> {r['target_location']}")
         self.set("G6", approval_required=True)
@@ -187,7 +198,8 @@ class Guard:
             self.add("G1", self.say("G1"), "added do-not-share warning")
 
     def g2_bypass(self) -> None:
-        if self.drop("G2", self.rules["G2"]["patterns"]) or "security_control_disabled" in self.signals:
+        about_controls = re.search(r"(?i)firewall|anti-?virus|defender|endpoint protection|防火牆|防毒|端點", self.text)
+        if self.drop("G2", self.rules["G2"]["patterns"]) or ("security_control_disabled" in self.signals and about_controls):
             if not re.search(r"(?i)re-?enable|turn(ed)? (it |them )?(back )?on|keep\b.{0,40}\b(on|enabled)|重新開啟|保持.{0,10}開啟", self.d.user_reply):
                 self.add("G2", self.say("G2"), "added keep-protection-on advice")
 

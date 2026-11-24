@@ -66,6 +66,18 @@ def create_ticket(db, request_id: str, d: Decision, kind: str, status: str, summ
     return tid
 
 
+def update_ticket(db, ticket_id: str, request_id: str, d: Decision, status: str) -> None:
+    """A later turn of the same conversation fills in fields: update the open ticket, do not open a second one."""
+    fields = {f.name: f.value for f in d.ticket_fields}
+    db.execute("UPDATE tickets SET category=?, priority=?, team=?, status=?, approval_required=?, approver=?, fields=?, "
+               "missing=? WHERE id=?", (d.category, d.priority, d.team, status, int(d.approval_required), d.approver,
+                                        json.dumps(fields, ensure_ascii=False), json.dumps(d.missing_fields), ticket_id))
+    if status == "pending_approval" and not db.execute(
+            "SELECT 1 FROM approvals WHERE ticket_id=? AND status='pending'", (ticket_id,)).fetchone():
+        db.execute("INSERT INTO approvals (ticket_id, approver, status) VALUES (?,?,?)", (ticket_id, d.approver, "pending"))
+    audit(db, "agent", "update_ticket", request_id, {"ticket": ticket_id, "status": status})
+
+
 def link_to_incident(db, request_id: str, incident_id: str) -> None:
     db.execute("INSERT INTO links VALUES (?,?,?)", (request_id, incident_id, now()))
     audit(db, "agent", "link_to_incident", request_id, {"incident": incident_id})
@@ -92,8 +104,14 @@ def act(db, req: Request, d: Decision, incident_kind: bool, notify: str = "") ->
                 status = "pending_user"
             if d.action == "create_ticket" and d.approval_required:
                 status = "pending_approval"
-            tid = create_ticket(db, req.request_id, d, kind, status, d.agent_note[:300])
-            done.append({"tool": "create_ticket", "ticket": tid, "kind": kind, "status": status})
+            open_ticket = db.execute("SELECT id FROM tickets WHERE request_id=? AND kind=? AND status IN "
+                                     "('new','pending_user','pending_approval') ORDER BY id DESC", (req.request_id, kind)).fetchone()
+            if open_ticket:
+                update_ticket(db, open_ticket["id"], req.request_id, d, status)
+                done.append({"tool": "update_ticket", "ticket": open_ticket["id"], "kind": kind, "status": status})
+            else:
+                tid = create_ticket(db, req.request_id, d, kind, status, d.agent_note[:300])
+                done.append({"tool": "create_ticket", "ticket": tid, "kind": kind, "status": status})
         if d.action == "link_incident" and d.incident_id:
             link_to_incident(db, req.request_id, d.incident_id)
             done.append({"tool": "link_to_incident", "incident": d.incident_id})
