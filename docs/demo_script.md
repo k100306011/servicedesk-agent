@@ -31,11 +31,11 @@ Before the demo: click **Reset database** in the sidebar.
 - **Say.** "Location is one of the four KB-012 criteria. The data has no location, so the agent asks; in production Microsoft Graph knows the office."
 
 ## 5. Optional: change a rule live (60 s)
-- **Do.** In `config/policies.yaml`, under `custom_rules`, uncomment the example rule *AI browser extensions need a security review*. Click **Reload config** in the sidebar, then send NEW-006 from the example list.
+- **Do.** In `config/policies.yaml`, replace the line `custom_rules: []` with the commented example below it (*AI browser extensions need a security review*; remove the `# `). Click **Reload config** in the sidebar, then send NEW-006 from the example list.
 - **Expect.** The ticket gets the field `security_review: required` and the approver includes Security Operations review. The guard fixes list shows the custom rule ID.
 - **Say.** "Policy lives in configuration and every rule is tested, so a change is small and visible."
 
 ## Fallbacks
 - Step-by-step trace for any request: `python -m sdagent run --id NEW-005 --profile local --explain`
 - No model available: switch the sidebar profile to `offline` (B0 rules). Steps 1, 3 and 4 still work with template replies.
-- Screenshots of each step are in `report/figures/demo_*.png`.
+- Screenshots from the dry run on 2026-11-24 (local profile, B3): `report/figures/demo_1_console_queue.jpg`, `demo_1_new012_injection.jpg`, `demo_2_chat_mfa_trace.jpg`, `demo_4_chinese_email.jpg`. Step 3 and step 5 were checked in the dry run but have no screenshot; take them in your own rehearsal.
