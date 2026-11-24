@@ -21,6 +21,10 @@ These changes came from unit tests, smoke tests on dev items (incoming and histo
 | 0.7 | G2 adds the keep-protection advice only when the user text mentions a security control | guard.py | NEW-006 | The model flagged `security_control_disabled` on a browser-extension request, so G2 added a firewall sentence that made no sense |
 | 0.8 | New tool `update_ticket`: a later chat turn updates the open ticket | actions.py | NEW-009 multi-turn walk-through | The second turn opened a second ticket |
 | 0.9 | G6: any target location that is not an alternate location is replaced; the user's path is kept as `requested_location` | guard.py | NEW-009 multi-turn walk-through | The model set the target to the original folder path, which is an overwrite |
+| 0.10 | B0 cites the KB of the category it routed to first | src/sdagent/baseline.py | first B0 dry run of the evaluation harness (NEW-008) | B0 cited the two top BM25 hits (KB-002, KB-007) and never its own Security article |
+| 0.11 | G5 writes related open tickets into the service desk note and suggests linking them | guard.py | same dry run (NEW-010) | KB-010 asks to link related reports; the reply asked for the pool but said nothing about the five existing tickets |
+
+Evaluation harness fix in the same dry run (not a rubric change): the `advises_reenable_protection` pattern allowed only 40 characters between "keep" and "on", so it missed "Keep the firewall and endpoint protection turned on". The window is now 60.
 
 ## Round 1
 

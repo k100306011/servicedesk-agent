@@ -95,7 +95,9 @@ def decide_offline(text: str, u: Understanding, corr: Correlation, kb_hits: list
     var = variant(category, text)
     category, team = route(category, var, text, signals, u, corr)
     prio = priority(text, signals, u, corr)
-    kb = [h["id"] for h in kb_hits][:2]
+    own = routing()["categories"].get(category, {}).get("kb", "")
+    ids = [h["id"] for h in kb_hits]
+    kb = ([own] if own in ids else []) + [k for k in ids if k != own][:1]  # the routed category's KB first
     d = Decision(action="create_ticket", category=category, priority=prio, team=team, incident_id="",
                  approval_required=False, approver="", ticket_status="new", ticket_fields=[], missing_fields=[],
                  user_reply="", agent_note="B0 rules", cited_kb=kb, confidence=0.5)

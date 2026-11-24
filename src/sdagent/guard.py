@@ -104,6 +104,9 @@ class Guard:
     def g5_incident(self) -> None:
         """Confirmed match: link, give the status, no new incident. Possible match: ask first (success criteria)."""
         c, r = self.corr, self.rules["G5"]
+        if c.related_tickets and "Related open tickets" not in self.d.agent_note:  # KB-010: link reports, no duplicates
+            self.d.agent_note = (f"{self.d.agent_note} Related open tickets: {', '.join(c.related_tickets)}. "
+                                 f"Link them to {c.incident_id or 'one incident'} instead of opening duplicates.").strip()
         if self.d.action == "escalate_security":
             return
         inc = c.incident
