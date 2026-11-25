@@ -9,6 +9,7 @@ The brief allows AI-assisted development and asks me to say how I used it. I use
 - A first draft of the rubric for the 12 incoming requests, written from the KB.
 - Checking Azure product names, GA or preview status and prices on Microsoft Learn, with links and dates.
 - Running the test and evaluation commands, and a first draft of the error analysis.
+- First passes of the human-review scores (`eval/human_scores.csv`) and of the second check of the label corrections, each with its KB reason.
 
 ## What I did
 
@@ -28,4 +29,8 @@ The brief allows AI-assisted development and asks me to say how I used it. I use
 
 ## Time
 
-Time I spent: ____ hours (planning, review, testing and changes).
+The brief recommends no more than eight hours. I spent about four hours in total:
+
+- Planning before the build: scope, success criteria, test design and a step plan.
+- Build, evaluation and documents with the assistant: about 2.5 hours on 2026-11-24 (13:57 to 16:30; the build commits run from 14:12 to 15:56).
+- After that: review of the human-review scores and the label corrections on 2026-11-25, the hands-on changes and the demo rehearsal.
