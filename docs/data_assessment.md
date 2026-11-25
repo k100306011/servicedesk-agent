@@ -131,4 +131,4 @@ When they conflict, the KB wins and the conflict is listed for the knowledge and
 - A6 Text imported from external systems is data, never instructions.
 
 ## Label audit
-`eval/label_audit.csv` lists 9 policy corrections (3 change the priority bucket). Values with `|` accept either option where the KB supports both. All rows are pending review by the process owner. Historical scores are reported against both the original and the corrected labels.
+`eval/label_audit.csv` lists 9 policy corrections (3 change the priority bucket). Values with `|` accept either option where the KB supports both. 9 of 9 were confirmed in a second check against the KB (`review_note` gives the reason for each); in a real project the process owner signs them off. Historical scores are reported against both the original and the corrected labels.

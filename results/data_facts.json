@@ -422,6 +422,7 @@
   },
   "label_audit": {
     "rows": 9,
-    "changes_bucket": 3
+    "changes_bucket": 3,
+    "confirmed": 9
   }
 }

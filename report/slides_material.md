@@ -22,7 +22,7 @@ Each slide: title · key message · bullets (on the slide) · visual · speaker 
 - **Key message:** The KB is the policy; history is noisy examples; the data has no user location.
 - **Bullets:** 50 tickets = 10 categories × 5, one per day: a curated sample, not a workload · 8 tickets routed to an unusual team; 4 labels contradict the KB (INC-1016, 1018, 1020, 1022) · KB-011 deprecated; no HR policy, no P1–P4 scale · Incidents have a region scope, users have no location · Trust order: active KB > incident snapshot > historical labels
 - **Visual:** table from `docs/data_assessment.md` (conflicts)
-- **Notes:** 每個數字都是 assess-data 算的。標籤我不偷偷改，列成 label_audit.csv 給負責人確認，評分兩種都報。沒有地點這件事後面會變成 NEW-007 要先問的原因。
+- **Notes:** 每個數字都是 assess-data 算的。標籤我不偷偷改，列成 label_audit.csv；我又逐筆對照 KB 複核一次，9 筆都成立，但正式導入還是要流程負責人簽核，所以評分兩種都報。沒有地點這件事後面會變成 NEW-007 要先問的原因。
 - **Time:** 90 s
 
 ## 4. Scope and success criteria, written first

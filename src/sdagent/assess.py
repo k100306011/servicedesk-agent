@@ -100,7 +100,8 @@ def assess() -> dict:
                "items": [{k: a[k] for k in ("id", "title", "owner", "last_reviewed", "status", "superseded_by")} for a in kb],
                "gap_keyword_hits": gaps,
                "priority_words": {w: len(re.findall(rf"\b{w}[- ]priority\b", kb_text, re.I)) for w in ("high", "medium", "low")}},
-        "label_audit": {"rows": len(audit), "changes_bucket": sum(1 for a in audit if a.get("bucket_change") == "yes")},
+        "label_audit": {"rows": len(audit), "changes_bucket": sum(1 for a in audit if a.get("bucket_change") == "yes"),
+                        "confirmed": sum(1 for a in audit if a.get("review_status") == "confirmed")},
     }
 
 
@@ -201,7 +202,9 @@ def render(f: dict) -> str:
         "",
         "## Label audit",
         f"`eval/label_audit.csv` lists {f['label_audit']['rows']} policy corrections ({f['label_audit']['changes_bucket']} change the priority bucket). "
-        "Values with `|` accept either option where the KB supports both. All rows are pending review by the process owner. "
+        "Values with `|` accept either option where the KB supports both. "
+        f"{f['label_audit']['confirmed']} of {f['label_audit']['rows']} were confirmed in a second check against the KB "
+        "(`review_note` gives the reason for each); in a real project the process owner signs them off. "
         "Historical scores are reported against both the original and the corrected labels.",
     ]
     return "\n".join(lines) + "\n"

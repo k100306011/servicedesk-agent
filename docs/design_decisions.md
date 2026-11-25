@@ -29,8 +29,8 @@ Each decision lists the context, the options I considered, the choice, and what 
 ## D-05 The KB is the policy source; historical labels are examples
 - **Context.** 8 tickets go to an unusual team and 4 labels contradict the current KB (for example INC-1016: a denied folder labeled Network).
 - **Options.** A: treat labels as ground truth. B: ignore history. C: use history as examples and precedents, and audit the labels against the KB.
-- **Choice.** C. `eval/label_audit.csv` lists 9 corrections with their KB reason, all pending review. Historical scores are reported against both the original and the corrected labels.
-- **Cost.** The corrections are my judgment until the process owner confirms them, so both numbers are shown.
+- **Choice.** C. `eval/label_audit.csv` lists 9 corrections with their KB reason. A second check against the KB confirmed all 9. Historical scores are reported against both the original and the corrected labels.
+- **Cost.** The corrections are my judgment until the process owner signs them off, so both numbers are shown.
 
 ## D-06 Structured output with validation; fail closed
 - **Context.** Free text cannot be routed or tested reliably.
