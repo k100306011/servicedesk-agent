@@ -99,7 +99,7 @@ I read the 12 incoming replies (B3, tag `tune2`, run 1) against the KB and score
 - **Checker items:** all 8 were decided correctly, so the critical counts do not change.
 - **What only a person caught:**
   - NEW-004 says SharePoint in the reply and in the ticket, but the user wrote "shared drive". No check looks for a detail the user never gave.
-  - The G3 sentence for folders says "I sent the request to the data owner", but the owner is still unknown at that point.
+  - The G3 sentence for folders says "I sent the request to the data owner", but the owner is still unknown at that point. Fixed after the final evaluation (see `docs/tuning_log.md`); the reported numbers are from before the fix.
   - NEW-006 says "I can't assist with installing" while it opens the software request.
   - NEW-001 names only the manager, but the ticket routes to the Finance application owner.
   - The tickets behind two good replies have problems that no check sees. NEW-008 stores `time_observed: Time of the incident` and says the user stopped using the site, which the user did not say. NEW-007 is an email outage, but its ticket goes to Network / Workplace Infrastructure and asks for a share path.

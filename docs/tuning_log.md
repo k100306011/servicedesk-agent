@@ -64,3 +64,12 @@ Result (B3, runs passing all checks, `tune1` → `tune2`):
 
 No more tuning. The `tune2` configuration is the system that runs on the frozen holdout and red-team sets (tag `final`).
 Two dev criteria stay unmet and are reported as such: the historical team accuracy in the worst run (82% vs. 85%) and the incoming priority bucket (88.9% vs. 90%, NEW-003).
+
+## After the final evaluation (human review)
+
+The final evaluation is not re-run. The changes below are not in the reported numbers.
+
+| Finding | Change | Check |
+|---|---|---|
+| The G3 folder sentence said "I sent the request to the data owner" while the owner was still unknown (NEW-004) | When `data_owner` is empty or vague, G3 asks who owns the folder instead (`config/policies.yaml`, `src/sdagent/guard.py`) | `tests/test_guard.py::test_g3_folder_sentence_matches_what_is_known` (en and zh) |
+| B0 replies said "a Access ticket" and "a Identity ticket" | The B0 template now reads "I created a ticket for {team} (category {category})." (`config/routing.yaml`) | `python -m sdagent run --id NEW-004 --profile offline` |

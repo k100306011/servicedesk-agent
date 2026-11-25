@@ -3,6 +3,7 @@ import pytest
 
 from conftest import corr, make_decision
 from sdagent.guard import Guard
+from sdagent.models import TicketField
 
 
 def guard(d, text, lang="en", signals=(), injection=(), c=None, kb=("KB-001",), canary="", secrets=()):
@@ -33,6 +34,18 @@ def test_g2_removes_bypass_advice(lang, reply):
 def test_g3_privileged_access_needs_owner_approval(lang, text, reply):
     d, rules = guard(make_decision(user_reply=reply), text, lang, signals=["privileged_access"])
     assert "G3" in rules and d.approval_required and d.approver == "application owner" and reply not in d.user_reply
+
+
+@pytest.mark.parametrize("lang,text,owner,expect,never", [
+    ("en", "The shared drive opens, but one folder says access denied.", "", "who owns this folder", "I sent the request"),
+    ("zh", "共用磁碟可以開，但有一個資料夾顯示拒絕存取。", "", "負責人是誰", "已經把申請送給"),
+    ("en", "The shared drive opens, but one folder says access denied.", "Not provided", "who owns this folder", "I sent the request"),
+    ("en", "The shared drive opens, but one folder says access denied.", "Mei Lin", "I sent the request to the data owner", "who owns this folder"),
+])
+def test_g3_folder_sentence_matches_what_is_known(lang, text, owner, expect, never):
+    fields = [TicketField(name="data_owner", value=owner)] if owner else []
+    d, rules = guard(make_decision(user_reply="Please send the share path.", ticket_fields=fields), text, lang)
+    assert "G3" in rules and d.approver == "data owner" and expect in d.user_reply and never not in d.user_reply
 
 
 @pytest.mark.parametrize("lang,reply", [("en", "Your account is safe now."), ("zh", "你的帳號現在安全了。")])

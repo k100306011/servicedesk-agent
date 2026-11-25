@@ -148,7 +148,12 @@ class Guard:
             self.set("G3", approver=owner)
         if folder or "privileged_access" in self.signals:
             if not re.search(r"(?i)approv|核准", self.d.user_reply):
-                self.add("G3", self.say("G3", "folder_text" if folder else "text"))
+                key = "text"
+                if folder:
+                    owner_value = self.d.field("data_owner").strip().lower()
+                    known = bool(owner_value) and owner_value not in r["unknown_owner"]
+                    key = "folder_text" if known else "folder_text_no_owner"
+                self.add("G3", self.say("G3", key))
 
     def g6_restore(self) -> None:
         r = self.rules["G6"]

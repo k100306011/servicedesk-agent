@@ -146,6 +146,8 @@ rules:
     folder_approver: data owner
     text: {en: "This access needs approval from the application owner before anything changes. I cannot grant it now.", zh: "這個權限要先經過系統負責人核准才能開通，我現在不能直接開給你。"}
     folder_text: {en: "Folder permissions change only with the data owner's approval, so I sent the request to the data owner.", zh: "資料夾權限要經過資料負責人核准才能調整，我已經把申請送給資料負責人。"}
+    folder_text_no_owner: {en: "Folder permissions change only with the data owner's approval. If you know who owns this folder, please tell me, and I will add it to the request.", zh: "資料夾權限要經過資料負責人核准才能調整。如果你知道這個資料夾的負責人是誰，請告訴我，我會補進申請單。"}
+    unknown_owner: ["not provided", "unknown", "n/a", "none", "tbd", "未提供", "不明", "不知道"]
   G4:
     name: Security signals always go to Security Operations at P1
     source: [KB-002, KB-008]

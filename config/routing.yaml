@@ -191,7 +191,7 @@ approvals:
 
 # Template replies for B0 (no model) and for the guard when it rebuilds a reply.
 replies:
-  create_ticket: {en: "I created a {category} ticket for {team}.", zh: "我已經建立一張 {category} 單，交給 {team}。"}
+  create_ticket: {en: "I created a ticket for {team} (category {category}).", zh: "我已經建立一張 {category} 單，交給 {team}。"}
   incident_ticket: {en: "Several users are affected and there is no active incident for this, so I opened a high-priority incident for {team}.", zh: "這影響多位使用者，而且目前沒有相關的處理中事件，所以我開了一張高優先的事件單給 {team}。"}
   needs_approval: {en: "It needs approval from the {approver} before anything changes.", zh: "需要 {approver} 核准後才會處理。"}
   missing: {en: "To complete it, please send: {missing}.", zh: "請補充以下資訊：{missing}。"}
