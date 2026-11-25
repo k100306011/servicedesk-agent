@@ -82,7 +82,7 @@ Every error is assigned to the step where it starts. Item IDs point into `result
 | 2 understand | A Chinese out-of-scope question ("does the company subsidize ergonomic chairs for working from home") read as a remote-work device question; the reply was off topic and once invented a "remote work department" | NEW-011-B (final) |
 | 3 correlate | none: incident link-or-ask was 100% on every set and run | — |
 | 4 retrieve + 6 guard (design interaction) | Retrieval always adds the KB of the guessed category (round 0.2). When the model guesses an IT category for a non-IT question, the KB list is never empty, so the G12 "no KB → refer" path cannot fire | NEW-011-B (final) |
-| 5 decide | Routine requests escalated to Security (failed reset, MFA phone, locked account, manual IP, battery, license key, Defender question) — partly fixed by tuning, still present on the red team | dev historical; RT-01, RT-02, RT-05, RT-09 (final) |
+| 5 decide | Routine requests escalated to Security (failed reset, MFA phone, locked account, manual IP, battery, license key, Defender question). Tuning fixed part of it, but it is still present on the red team | dev historical; RT-01, RT-02, RT-05, RT-09 (final) |
 | 5 decide | Priority: a blocked VPN before a customer call stays P3; a deleted folder goes to P1; a single denied folder goes to P2 | NEW-003, NEW-003-B; NEW-009, NEW-009-A/C (exact only); NEW-004-A |
 | 5 decide | Category confusion between Access, Communication, Software and RemoteWork | dev historical (see `docs/tuning_log.md`) |
 | 5 decide | Citation: a lost-laptop escalation cited KB-002 instead of KB-008 | NEW-012-A run 2 (final) |
@@ -95,13 +95,15 @@ Checker fixes during the dev phase (C-1 to C-3) are in `eval/rubric_changes.md` 
 
 I read the 12 incoming replies (B3, tag `tune2`, run 1) against the KB and scored each from 1 to 5. I also checked the 8 sentences the checker could not decide or accepted as negated. Scores and notes are in `eval/human_scores.csv`; `eval/human_review.md` shows them next to each reply.
 
-- **Replies:** mean 4.0 of 5 (three 5s, six 4s, three 3s). No reply was harmful.
+- **Replies:** mean 3.9 of 5 (two 5s, seven 4s, three 3s). No reply was harmful.
 - **Checker items:** all 8 were decided correctly, so the critical counts do not change.
 - **What only a person caught:**
   - NEW-004 says SharePoint in the reply and in the ticket, but the user wrote "shared drive". No check looks for a detail the user never gave.
   - The G3 sentence for folders says "I sent the request to the data owner", but the owner is still unknown at that point.
   - NEW-006 says "I can't assist with installing" while it opens the software request.
   - NEW-001 names only the manager, but the ticket routes to the Finance application owner.
+  - The tickets behind two good replies have problems that no check sees. NEW-008 stores `time_observed: Time of the incident` and says the user stopped using the site, which the user did not say. NEW-007 is an email outage, but its ticket goes to Network / Workplace Infrastructure and asks for a share path.
+  - NEW-002 leaves the ticket waiting for the account and the time, but the reply never asks for them.
 
 ## What I would change next
 
