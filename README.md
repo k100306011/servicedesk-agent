@@ -117,7 +117,8 @@ Critical violations by comparison group (incoming / historical / holdout / red t
 B1 model only 3–7 / 9–11 / 13–19 / 4–8 · B2 model + KB + incidents 0–1 / 0 / 2 / 2 · B3 0/0/0/0.
 
 Recompute every number from the raw runs: `python -m sdagent summarize` (tables, figures, human-review sheet) and
-`python -m eval.cost` (token recount and cost, needs `tiktoken`).
+`python -m eval.cost` (token recount and cost, needs `tiktoken`). Human scores are kept in `eval/human_scores.csv`,
+so a new summary keeps them.
 
 ## Repository map
 

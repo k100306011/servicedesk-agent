@@ -5,7 +5,7 @@ What this prototype does not show, and what I would do about it.
 ## Data and evaluation
 - **Small, synthetic data.** 12 incoming requests, 50 historical tickets, 36 holdout and 12 red-team items. The numbers show behavior on these cases; they are not a statistically strong benchmark. One item is about 8 percentage points on the incoming set.
 - **Same author for rules and tests.** I wrote the rubric, the holdout items and the guard rules. Freezing the sets before any rule existed limits the damage, but the holdout checks overfitting to the dev set; it is not an independent benchmark. Shadow mode on real tickets is the real test.
-- **Rule-based text checks.** The checker uses regular expressions (written separately from the guard). They miss paraphrases and can misread negation. Unclear cases go to `eval/human_review.md`, which still needs a human score.
+- **Rule-based text checks.** The checker uses regular expressions (written separately from the guard). They miss paraphrases and can misread negation. Unclear cases go to `eval/human_review.md`. I scored them, and the 12 incoming replies, from `eval/human_scores.csv` (see the Human review section in `docs/evaluation.md`). One reviewer on 12 replies is a small sample; production adds sampled reviews by the desk in shadow mode.
 - **Label corrections are my judgment.** I checked all 9 rows of `eval/label_audit.csv` a second time against the KB and confirmed them (the reason is in `review_note`). The process owner has not seen them, so historical scores are reported against both label sets.
 - **Priority mapping is an assumption** (A1 in `docs/data_assessment.md`). The KB has no P1–P4 scale.
 
