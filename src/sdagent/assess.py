@@ -151,7 +151,7 @@ def render(f: dict) -> str:
         "",
         table([list(x) for x in h["off_usual_team"]], ["Ticket", "Category", "Assigned team", "Usual team"]),
         "",
-        "Some are sound security hand-offs (Identity → Security Operations). Others show inconsistent routing.",
+        "Some are sound security hand-offs (from Identity to Security Operations). Others show inconsistent routing.",
         "",
         "Labels that conflict with the current KB (rule-based check):",
         "",

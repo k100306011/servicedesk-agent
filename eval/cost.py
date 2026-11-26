@@ -113,10 +113,10 @@ def write_doc(s: dict) -> None:
         "because the structured-output schema is added as a prefix to the system message (Microsoft Learn, prompt caching, "
         "https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/prompt-caching, page date 2026-09-09, checked 2026-11-24).",
         f"- Calls that needed a structured-output retry: {s['calls_with_retry']} of {s['calls']}.",
-        f"- **Prompt cache today: no benefit.** The cache needs an identical prefix of at least 1,024 tokens. The prompts put the "
+        f"- Prompt cache today: no benefit. The cache needs an identical prefix of at least 1,024 tokens. The prompts put the "
         f"per-request random markers near the top, so the identical prefix is only {s['shared_prefix_now']['understand']:,} "
         f"(understand) and {s['shared_prefix_now']['decide']:,} (decide) tokens.",
-        f"- **With a reordered prompt** (random markers, canary, language and channel moved to the end), about "
+        f"- With a reordered prompt (random markers, canary, language and channel moved to the end), about "
         f"{p['cacheable_reordered']:,.0f} input tokens per request become cacheable. That is a production change, not tested here.", "",
         f"## Prices (USD per 1M tokens, short context, Standard; official pricing page, checked {s['prices_checked']})", "",
         f"Source: {s['price_source']}", "",

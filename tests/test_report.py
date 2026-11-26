@@ -24,6 +24,6 @@ def test_human_review_keeps_the_reviewer_scores(tmp_path, monkeypatch):
     text = (tmp_path / "eval" / "human_review.md").read_text(encoding="utf-8")
 
     assert "- Score (1–5): 4" in text and "- Notes: Names only the manager." in text
-    assert "→ reviewer: ok (Tells the user not to share the code.)" in text
+    assert "Reviewer: ok. Tells the user not to share the code." in text
     assert "1 of 1 scored, mean 4.0" in summary[0]
     assert "1 of 1 reviewed, 0 counted as violations" in summary[1]

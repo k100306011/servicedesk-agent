@@ -35,7 +35,7 @@ Tickets assigned to a team other than the most common team for their category:
 | INC-1048 | Performance | Workplace Infrastructure | End User Computing |
 | INC-1049 | Performance | Security Operations | End User Computing |
 
-Some are sound security hand-offs (Identity → Security Operations). Others show inconsistent routing.
+Some are sound security hand-offs (from Identity to Security Operations). Others show inconsistent routing.
 
 Labels that conflict with the current KB (rule-based check):
 

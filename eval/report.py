@@ -186,7 +186,7 @@ def human_review(data: dict, tag: str) -> list[str]:
         if not h:
             return ""
         verdicts.append(h["verdict"])
-        return f" → reviewer: {h['verdict']} ({h['note']})"
+        return f" Reviewer: {h['verdict']}. {h['note']}"
 
     body = []
     runs = next((v for k, v in data.items() if k[:3] == (tag, "B3", "incoming")), [])
@@ -197,7 +197,7 @@ def human_review(data: dict, tag: str) -> list[str]:
         if h.get("score"):
             scores.append(int(h["score"]))
         body += [f"### {r['item']} ({r['channel']})", f"- Request: {r['message']}",
-                 f"- Decision: {d['action']} · {d['category']} · {d['priority']} · {d['team']}" + (f" · {d['incident_id']}" if d["incident_id"] else ""),
+                 f"- Decision: {d['action']}, {d['category']}, {d['priority']}, {d['team']}" + (f", {d['incident_id']}" if d["incident_id"] else ""),
                  f"- Reply: {d['user_reply']}", f"- Guard fixes: {', '.join(f['rule'] + ' ' + f['change'] for f in r['guard_fixes']) or 'none'}",
                  f"- Score (1–5): {h.get('score', '')}", f"- Notes: {h.get('note', '')}", ""]
     body.append("## Items the checker could not decide (B3, all tags)\n")
@@ -249,7 +249,7 @@ def summarize() -> None:
             rows = [[c] + [span([r.get(n) for r in per[k]]) for n in (hist if s == "historical" else main)]
                     for c in CONFIGS for k in per if k[:3] == (t, c, s)]
             if rows:
-                md += ["", f"## {s} — tag `{t}`", "", table(["config"] + (hist if s == "historical" else main), rows)]
+                md += ["", f"## {s}, tag `{t}`", "", table(["config"] + (hist if s == "historical" else main), rows)]
     md += ["", "## Human review", "", "Reviewer scores from `eval/human_scores.csv`; every reply and item is in `eval/human_review.md`.", "",
            *human_review(data, tag)]
     (ROOT / "results" / "summary.md").write_text("\n".join(md) + "\n", encoding="utf-8")
