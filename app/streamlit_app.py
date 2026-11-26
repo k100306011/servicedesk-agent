@@ -26,7 +26,7 @@ with st.sidebar:
     default = os.getenv("LLM_PROFILE", "offline").split("#")[0].strip()
     profile = st.selectbox("Model profile", ["offline", "local", "azure"], index=["offline", "local", "azure"].index(default))
     config = st.selectbox("Configuration", ["B3", "B2", "B1"] if profile != "offline" else ["B0"],
-                          help="B0 rules only · B1 model only · B2 model + KB + incidents · B3 all 7 steps")
+                          help="B0: rules only. B1: model only. B2: model, KB and incidents. B3: all 7 steps.")
     if st.button("Reload config (YAML and prompts)"):
         data.reload()
         st.success("Config reloaded")
@@ -38,7 +38,7 @@ with st.sidebar:
 
 def show_trace(t) -> None:
     for s in t.steps:
-        st.markdown(f"**{s.name}** — {s.summary} `{s.ms} ms`")
+        st.markdown(f"**{s.name}**: {s.summary} `{s.ms} ms`")
         if s.output not in (None, [], {}):
             st.json(s.output, expanded=False)
     if t.pre_guard and t.guard_fixes:

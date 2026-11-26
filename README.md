@@ -43,6 +43,8 @@ Copy `.env.example` to `.env` and pick a profile:
 | `azure` | Azure OpenAI v1 endpoint with the standard OpenAI SDK | `AZURE_OPENAI_BASE_URL` (ends with `/openai/v1/`), `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT` |
 
 The results in this repo come from an open-weight 14B model served by vLLM on a single RTX 4090 workstation (`local`).
+The app opens on the profile in `LLM_PROFILE` (`.env` or the environment), for example
+`LLM_PROFILE=local streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8601`.
 
 ```bash
 python -m sdagent run --id NEW-005 --profile local --explain   # one request, step by step
@@ -93,6 +95,7 @@ flowchart LR
 
 The order is fixed in code; the model only understands and decides. Rules, routing, priorities, required fields and keywords
 live in `config/*.yaml`; prompts live in `prompts/*.md`. Every request leaves a full trace.
+A six-minute demo script is in [docs/demo_script.md](docs/demo_script.md).
 More: [docs/architecture.md](docs/architecture.md) (three diagrams, including the Azure target).
 
 ## Results
@@ -139,6 +142,7 @@ so a new summary keeps them.
 | `eval/` | rubrics, label audit, checks, runner, scoring, report, frozen hashes, human review |
 | `results/` | raw runs (`results/runs/*.jsonl`) and summaries |
 | `docs/` | data assessment, success criteria, design decisions, architecture, evaluation, tuning log, Azure production, KPIs, cost model, demo script, AI tools usage, limitations |
+| `report/figures/` | result charts and demo screenshots |
 | `tests/` | pytest |
 
 ## Assumptions and limits

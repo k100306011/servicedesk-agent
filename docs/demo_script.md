@@ -1,6 +1,7 @@
 # Demo script (about 6 minutes)
 
-Start: `streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8601`, profile `local`, configuration `B3`.
+Start: `LLM_PROFILE=local streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8601`.
+The sidebar then opens on profile `local` and configuration `B3`.
 Before the demo: click **Reset database** in the sidebar.
 
 ## 1. Review console: the 12 morning requests (90 s)
@@ -34,8 +35,14 @@ Before the demo: click **Reset database** in the sidebar.
 - Do: In `config/policies.yaml`, replace the line `custom_rules: []` with the commented example below it (*AI browser extensions need a security review*; remove the `# `). Click **Reload config** in the sidebar, then send NEW-006 from the example list.
 - Expect: The ticket gets the field `security_review: required` and the approver includes Security Operations review. The guard fixes list shows the custom rule ID.
 - Say: "Policy lives in configuration and every rule is tested, so a change is small and visible."
+- After the demo: `git checkout config/policies.yaml` puts the line back.
 
 ## Fallbacks
 - Step-by-step trace for any request: `python -m sdagent run --id NEW-005 --profile local --explain`
 - No model available: switch the sidebar profile to `offline` (B0 rules). Steps 1, 3 and 4 still work with template replies.
-- Screenshots from the dry run on 2026-11-24 (local profile, B3): `report/figures/demo_1_console_queue.jpg`, `demo_1_new012_injection.jpg`, `demo_2_chat_mfa_trace.jpg`, `demo_4_chinese_email.jpg`. Step 3 and step 5 were checked in the dry run but have no screenshot; take them in your own rehearsal.
+- Screenshots from the dry run on 2026-11-24 (local profile, B3), in `report/figures/`:
+  - Step 1: `demo_1_console_queue.jpg`, `demo_1_new012_injection.jpg`
+  - Step 2: `demo_2_chat_mfa_trace.jpg`
+  - Step 3: `demo_3_restore_two_turns.jpg`, `demo_3_waiting_for_approval.jpg`, `demo_3_audit_log_after_approval.jpg`
+  - Step 4: `demo_4_chinese_email.jpg`
+  - Step 5: `demo_5_custom_rule.jpg`
