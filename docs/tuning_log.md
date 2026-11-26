@@ -26,7 +26,7 @@ These changes came from unit tests, smoke tests on dev items (incoming and histo
 
 Evaluation harness fix in the same dry run (not a rubric change): the `advises_reenable_protection` pattern allowed only 40 characters between "keep" and "on", so it missed "Keep the firewall and endpoint protection turned on". The window is now 60.
 
-## Round 1 (after the first formal dev run, tag `dev` → `tune1`)
+## Round 1 (after the first formal dev run, from tag `dev` to `tune1`)
 
 Error analysis of B3 on `dev` (details in [evaluation.md](evaluation.md)): the model escalated routine identity, hardware and software requests to Security (decide step, and the understand step flagged `unexpected_mfa` for a failed password reset); the word "access" pulled channel, recording and software-portal requests into Access; the Performance exception (several regions → Workplace Infrastructure) was ignored; NEW-003 stayed P3 and NEW-009 went to P1.
 
@@ -38,13 +38,13 @@ Error analysis of B3 on `dev` (details in [evaluation.md](evaluation.md)): the m
 | Category notes: channel, recording, list and room access is Communication; an approved app missing from the portal is Software; removing old access is Access; failed reset, new MFA phone and locked account are Identity; swollen battery is a Hardware safety case; Performance team rule written per case | config/routing.yaml |
 | P2 wording: "one user blocked from production work or a customer commitment within hours" | config/routing.yaml |
 
-Result (B3, runs passing all checks, `dev` → `tune1`):
-- **Fixed:** NEW-009 1→3, INC-1010 1→2, INC-1023 0→3, INC-1025 0→1, INC-1026 0→3, INC-1030 1→2, INC-1032 0→1, INC-1033 0→3, INC-1046 0→1.
-- **Broke:** INC-1011 3→1 (expired VPN token escalated to Security), INC-1017 3→2, INC-1035 3→0 (room controller routed to RemoteWork), INC-1043 3→1 (P1 → P3), INC-1044 3→2, INC-1050 2→0 (VDI pool routed to RemoteWork).
-- **Not fixed:** NEW-003 stays P3 in all runs.
+Result (B3, runs passing all checks, from `dev` to `tune1`):
+- Fixed: NEW-009 1→3, INC-1010 1→2, INC-1023 0→3, INC-1025 0→1, INC-1026 0→3, INC-1030 1→2, INC-1032 0→1, INC-1033 0→3, INC-1046 0→1.
+- Broke: INC-1011 3→1 (expired VPN token escalated to Security), INC-1017 3→2, INC-1035 3→0 (room controller routed to RemoteWork), INC-1043 3→1 (P1 → P3), INC-1044 3→2, INC-1050 2→0 (VDI pool routed to RemoteWork).
+- Not fixed: NEW-003 stays P3 in all runs.
 - Historical team vs corrected labels 78–80% → 80–86%; category 70–72% → 74–82%; priority bucket 84–86% → 78–88%. Incoming unchanged (team 100%, priority bucket 88.9%).
 
-## Round 2 (last round, tag `tune1` → `tune2`)
+## Round 2 (last round, from tag `tune1` to `tune2`)
 
 Error analysis of B3 on `tune1`: requests about the VPN token, a meeting-room controller, a VDI pool and a drive that drops at home were routed to RemoteWork or escalated; NEW-003 still P3.
 
@@ -54,10 +54,10 @@ Error analysis of B3 on `tune1`: requests about the VPN token, a meeting-room co
 | An expired token or a sign-in error gets the KB-003 steps, not an escalation | prompts/decide.md |
 | P2 wording taken from KB-001: "an existing access failure that blocks business-critical work now, such as production work or a customer commitment within hours" | config/routing.yaml |
 
-Result (B3, runs passing all checks, `tune1` → `tune2`):
-- **Fixed:** INC-1008 0→1, INC-1011 1→2, INC-1017 2→3, INC-1025 1→2, INC-1032 1→2, INC-1043 1→3, INC-1046 1→3, INC-1050 0→3.
-- **Broke:** NEW-009 3→0 (exact priority back to P1; the high/normal bucket still passes), INC-1010 2→1, INC-1019 3→2, INC-1033 3→2.
-- **Not fixed:** NEW-003 stays P3 in every run, so the incoming priority bucket stays at 88.9% (8 of 9 scored items).
+Result (B3, runs passing all checks, from `tune1` to `tune2`):
+- Fixed: INC-1008 0→1, INC-1011 1→2, INC-1017 2→3, INC-1025 1→2, INC-1032 1→2, INC-1043 1→3, INC-1046 1→3, INC-1050 0→3.
+- Broke: NEW-009 3→0 (exact priority back to P1; the high/normal bucket still passes), INC-1010 2→1, INC-1019 3→2, INC-1033 3→2.
+- Not fixed: NEW-003 stays P3 in every run, so the incoming priority bucket stays at 88.9% (8 of 9 scored items).
 - Historical team vs corrected labels 80–86% → 82–90%; category 74–82% → 78–84%; priority bucket 78–88% → 86–90%.
 
 ## After round 2

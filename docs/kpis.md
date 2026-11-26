@@ -13,10 +13,10 @@ Business KPIs say whether it helps users and the desk. Production needs both.
 
 ## How to measure
 
-1. **Baseline first.** Run in shadow mode for 2–4 weeks: the agent proposes, people decide. This gives the baseline for triage time and reassignments, and the agreement rate between agent and desk.
-2. **Compare by queue in assisted mode.** Turn on assisted mode for some queues first and compare them with queues that still work the old way. Same period, so seasonality and incident load do not distort the result.
-3. **Weekly regression.** Run the frozen dev, holdout and red-team sets on every change to prompts, rules or models, and every week. Release only when critical violations stay at 0.
-4. **Monthly review with the knowledge owners.** Which guard rules fired, which requests had no KB match, which labels were corrected. Each KB gap becomes a new or updated article.
+1. Baseline first: run shadow mode for 2 to 4 weeks. The agent proposes and people decide. This gives the baseline for triage time and reassignments, and the agreement rate between agent and desk.
+2. Compare by queue in assisted mode: turn on assisted mode for some queues first and compare them with queues that still work the old way. Use the same period, so seasonality and incident load do not distort the result.
+3. Weekly regression: run the frozen dev, holdout and red-team sets on every change to prompts, rules or models, and every week. Release only when critical violations stay at 0.
+4. Monthly review with the knowledge owners: look at which guard rules fired, which requests had no KB match and which labels were corrected. Each KB gap becomes a new or updated article.
 
 ## Targets for the first production quarter (proposal)
 

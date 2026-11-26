@@ -19,15 +19,15 @@ The diagram is in [architecture.md](architecture.md#c-azure-target-architecture)
 | guard (`policies.yaml`) | Stays in code, versioned; every change runs the frozen evaluation set in CI | Policy must be auditable and testable | n/a |
 | Agent identity | **Microsoft Entra Agent ID**, managed identity, least privilege (the agent identity cannot resolve tickets), **Key Vault**, Private Endpoints and VNet | The agent is an identity that needs governance too | Entra Agent ID GA (Jun 2026). Hosted agents support bring-your-own VNet |
 | Trace and evaluation | **Foundry tracing** (OpenTelemetry) to **Application Insights**; **Foundry evaluations**; the frozen sets run in **GitHub Actions** or **Azure DevOps** on every prompt or rule change | Know at once when a change makes things worse | Tracing GA for prompt and hosted agents. Several agent evaluators (task adherence, intent resolution) are preview; the GitHub Action uses a beta tag |
-| — | **Microsoft Agent 365** (agent registry, observability, governance); **Microsoft Purview** (audit, DSPM, DLP) | The enterprise must see and govern every agent | Agent 365 GA (May 2026) |
+| (nothing in the prototype) | **Microsoft Agent 365** (agent registry, observability, governance); **Microsoft Purview** (audit, DSPM, DLP) | The enterprise must see and govern every agent | Agent 365 GA (May 2026) |
 | `results/` and the KPI table | ITSM data in **Microsoft Fabric**, KPIs in **Power BI** | Show business value, not only model scores | GA |
 
 ## Rollout in four phases
 
-1. **Shadow mode (2–4 weeks).** The agent only proposes; people work as today. Measure agreement between the agent and the desk on action, team and priority, plus every critical check. The frozen test sets keep running on each change.
-2. **Assisted mode.** Desk agents approve or edit each proposal with one click. Measure handling time, reassignments and ticket completeness by queue.
-3. **Low-risk automation.** Automate only low-risk paths, for example linking to a known incident or self-service answers with a cited KB article. Access, restores, software approval and security cases always keep a human approval.
-4. **Later.** Specialist agents per owning team, each with its own identity and permissions, connected over A2A. Only after the shared pipeline is stable.
+1. Shadow mode (2 to 4 weeks): the agent only proposes, and people work as today. Measure agreement between the agent and the desk on action, team and priority, plus every critical check. The frozen test sets keep running on each change.
+2. Assisted mode: desk agents approve or edit each proposal with one click. Measure handling time, reassignments and ticket completeness by queue.
+3. Low-risk automation: automate only low-risk paths, for example linking to a known incident or self-service answers with a cited KB article. Access, restores, software approval and security cases always keep a human approval.
+4. Later: specialist agents per owning team, each with its own identity and permissions, connected over A2A. This comes only after the shared pipeline is stable.
 
 ## Risks and how to handle them
 
@@ -41,14 +41,34 @@ The diagram is in [architecture.md](architecture.md#c-azure-target-architecture)
 
 ## Sources (opened on 2026-11-24)
 
-- Foundry Agent Service: https://learn.microsoft.com/en-us/azure/foundry/agents/overview · hosted agents: https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents · publish to Copilot and Teams: https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/publish-copilot
-- Microsoft Agent Framework: https://learn.microsoft.com/en-us/agent-framework/overview/ · human in the loop: https://learn.microsoft.com/en-us/agent-framework/workflows/human-in-the-loop · 1.0 release: https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-version-1-0/
-- Models: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure · model router: https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-router · deployment types: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types · v1 API: https://learn.microsoft.com/en-us/azure/foundry/openai/api-version-lifecycle
-- Foundry IQ (Azure AI Search): https://learn.microsoft.com/en-us/azure/search/whats-new · document-level access: https://learn.microsoft.com/en-us/azure/search/search-document-level-access-overview · Foundry IQ: https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/what-is-foundry-iq
-- Prompt Shields: https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/content-filter-prompt-shields · guardrails: https://learn.microsoft.com/en-us/azure/foundry/guardrails/guardrails-overview · PII: https://learn.microsoft.com/en-us/azure/ai-services/language-service/personally-identifiable-information/overview
-- Entra Agent ID: https://learn.microsoft.com/en-us/entra/agent-id/what-is-microsoft-entra-agent-id · Agent 365: https://learn.microsoft.com/en-us/microsoft-agent-365/overview · Purview for Foundry: https://learn.microsoft.com/en-us/purview/ai-azure-foundry
-- Tracing: https://learn.microsoft.com/en-us/azure/foundry/observability/concepts/trace-agent-concept · evaluators: https://learn.microsoft.com/en-us/azure/foundry/concepts/built-in-evaluators · CI: https://learn.microsoft.com/en-us/azure/foundry/how-to/evaluation-github-action
-- Graph user: https://learn.microsoft.com/en-us/graph/api/resources/user · change notifications: https://learn.microsoft.com/en-us/graph/change-notifications-overview · Azure Communication Services retirement guide: https://learn.microsoft.com/en-us/azure/communication-services/acs-retirement-and-breaking-changes-guide · Speech: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview
+- Foundry Agent Service: https://learn.microsoft.com/en-us/azure/foundry/agents/overview
+  - Hosted agents: https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents
+  - Publish to Copilot and Teams: https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/publish-copilot
+- Microsoft Agent Framework: https://learn.microsoft.com/en-us/agent-framework/overview/
+  - Human in the loop: https://learn.microsoft.com/en-us/agent-framework/workflows/human-in-the-loop
+  - 1.0 release: https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-version-1-0/
+- Models: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure
+  - Model router: https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-router
+  - Deployment types: https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types
+  - v1 API: https://learn.microsoft.com/en-us/azure/foundry/openai/api-version-lifecycle
+- Foundry IQ (Azure AI Search): https://learn.microsoft.com/en-us/azure/search/whats-new
+  - Document-level access: https://learn.microsoft.com/en-us/azure/search/search-document-level-access-overview
+  - Foundry IQ: https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/what-is-foundry-iq
+- Prompt Shields: https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/content-filter-prompt-shields
+  - Guardrails: https://learn.microsoft.com/en-us/azure/foundry/guardrails/guardrails-overview
+  - PII: https://learn.microsoft.com/en-us/azure/ai-services/language-service/personally-identifiable-information/overview
+- Entra Agent ID: https://learn.microsoft.com/en-us/entra/agent-id/what-is-microsoft-entra-agent-id
+  - Agent 365: https://learn.microsoft.com/en-us/microsoft-agent-365/overview
+  - Purview for Foundry: https://learn.microsoft.com/en-us/purview/ai-azure-foundry
+- Tracing: https://learn.microsoft.com/en-us/azure/foundry/observability/concepts/trace-agent-concept
+  - Evaluators: https://learn.microsoft.com/en-us/azure/foundry/concepts/built-in-evaluators
+  - CI: https://learn.microsoft.com/en-us/azure/foundry/how-to/evaluation-github-action
+- Graph user: https://learn.microsoft.com/en-us/graph/api/resources/user
+  - Change notifications: https://learn.microsoft.com/en-us/graph/change-notifications-overview
+  - Azure Communication Services retirement guide: https://learn.microsoft.com/en-us/azure/communication-services/acs-retirement-and-breaking-changes-guide
+  - Speech: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview
 - Entitlement management: https://learn.microsoft.com/en-us/entra/id-governance/entitlement-management-overview
-- Tools: https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/model-context-protocol · https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/openapi · Dynamics 365 MCP: https://learn.microsoft.com/en-us/dynamics365/customer-service/develop/mcp-tools-overview
+- Tools: https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/model-context-protocol
+  - https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/openapi
+  - Dynamics 365 MCP: https://learn.microsoft.com/en-us/dynamics365/customer-service/develop/mcp-tools-overview
 - Fabric: https://learn.microsoft.com/en-us/fabric/fundamentals/microsoft-fabric-overview

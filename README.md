@@ -77,8 +77,8 @@ no vLLM-only parameter is sent. What was verified without Azure:
   appears in SQLite, traces, the call log or the logs.
 - `python -m eval.azure_switch` points the azure profile at the local OpenAI-compatible server and compares it with the
   local profile on NEW-005, NEW-009 and NEW-012, with the local profile run twice as a control. Where the local profile
-  is stable, the azure profile gives the same result; where it varies (reply wording, and the priority of NEW-009),
-  it varies just as much between two local runs, because the canary and markers are random per request
+  is stable, the azure profile gives the same result. Where it varies (the reply wording and the priority of NEW-009),
+  it varies just as much between two local runs, because the canary and the markers are random for every request
   ([results/azure_switch_check.md](results/azure_switch_check.md)).
 The first step of a real rollout is to run the same test sets in the customer's Azure subscription.
 
@@ -97,9 +97,10 @@ More: [docs/architecture.md](docs/architecture.md) (three diagrams, including th
 
 ## Results
 
-Success criteria were written before any code ([docs/success_criteria.md](docs/success_criteria.md)); the holdout and
-red-team sets were frozen before any rule or prompt existed ([eval/FROZEN.md](eval/FROZEN.md)). B3 = all seven steps,
-three runs each, judged on the worst run. Full results and error analysis: [docs/evaluation.md](docs/evaluation.md).
+Success criteria were written before any code ([docs/success_criteria.md](docs/success_criteria.md)). The holdout and
+red-team sets were frozen before any rule or prompt existed ([eval/FROZEN.md](eval/FROZEN.md)). B3 runs all seven steps.
+Each configuration ran three times, and each criterion is judged on the worst run. Full results and the error analysis
+are in [docs/evaluation.md](docs/evaluation.md).
 
 | Criterion | Threshold | B3 result | Met |
 |---|---|---|---|
@@ -113,8 +114,14 @@ three runs each, judged on the worst run. Full results and error analysis: [docs
 | Ticket fields complete | 100% | 100% | yes |
 | Latency p95, one request at a time | < 10 s | 5.5–6.0 s | yes |
 
-Critical violations by comparison group (incoming / historical / holdout / red team): B0 rules 0/0/0/0 ·
-B1 model only 3–7 / 9–11 / 13–19 / 4–8 · B2 model + KB + incidents 0–1 / 0 / 2 / 2 · B3 0/0/0/0.
+Critical violations by comparison group (B0 runs once; B1 to B3 show the range over three runs):
+
+| Group | Incoming | Historical | Holdout | Red team |
+|---|---|---|---|---|
+| B0 rules only | 0 | 0 | 0 | 0 |
+| B1 model only | 3–7 | 9–11 | 13–19 | 4–8 |
+| B2 model, KB and incidents (no sanitize, no guard) | 0–1 | 0 | 2 | 2 |
+| B3 all seven steps | 0 | 0 | 0 | 0 |
 
 Recompute every number from the raw runs: `python -m sdagent summarize` (tables, figures, human-review sheet) and
 `python -m eval.cost` (token recount and cost, needs `tiktoken`). Human scores are kept in `eval/human_scores.csv`,
@@ -124,7 +131,7 @@ so a new summary keeps them.
 
 | Path | What it holds |
 |---|---|
-| `src/sdagent/` | the 7 steps, the B0 baseline, the CLI (about 1,720 lines, no file over 250) |
+| `src/sdagent/` | the 7 steps, the B0 baseline, the CLI (about 1,730 lines; the largest file, `guard.py`, has 254) |
 | `config/` | `routing.yaml` (categories, teams, priorities, fields, keywords) and `policies.yaml` (guard rules G1–G12) |
 | `prompts/` | `understand.md`, `decide.md`, `llm_only.md` |
 | `app/streamlit_app.py` | user chat, service desk review console, evaluation |
@@ -142,14 +149,14 @@ The main limits are in [docs/limitations.md](docs/limitations.md).
 
 ## Try a change yourself
 
-1. **Add a rule without code.** In `config/policies.yaml`, replace `custom_rules: []` with the commented example below it
+1. Add a rule without code. In `config/policies.yaml`, replace `custom_rules: []` with the commented example below it
    (AI browser extensions need a security review), then `python -m sdagent run --id NEW-006 --explain`.
    The ticket gets `security_review: required` and the guard fixes list shows `C1`.
-2. **Change a priority and see what breaks.** Add a custom rule that sets new finance access to P2, then
+2. Change a priority and see what breaks. Add a custom rule that sets new finance access to P2, then
    `python -m sdagent eval --config B0 --set incoming --tag try --profile offline`: NEW-001 now fails its priority check,
    because the rubric says P3. Rule changes and the rubric move together (see `eval/rubric_changes.md`).
-3. **Add a KB article.** Put `KB-013-....md` with `Status: Active` in `data/knowledge-base/` and run NEW-011 with `--explain`:
+3. Add a KB article. Put `KB-013-....md` with `Status: Active` in `data/knowledge-base/` and run NEW-011 with `--explain`:
    step 4 retrieves it (the index is rebuilt at start).
-4. **Compare rules and model.** Run NEW-003 and NEW-012 with `--profile offline` and with `--profile local`.
-5. **Add an incident in a test copy.** Copy `data/current_incidents.csv`, add a VPN incident for APAC, and point
+4. Compare rules and model. Run NEW-003 and NEW-012 with `--profile offline` and with `--profile local`.
+5. Add an incident in a test copy. Copy `data/current_incidents.csv`, add a VPN incident for APAC, and point
    `SDAGENT_INCIDENTS` at the copy: a VPN outage reported from Singapore links to it, the same report without a location asks first.
