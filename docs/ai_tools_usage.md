@@ -37,3 +37,4 @@ The brief recommends no more than eight hours. I spent about four hours in total
 - Planning before the build: the scope, the success criteria, the test design and a step plan.
 - Build, evaluation and documents with the coding assistant: about 2.5 hours on 2026-11-24, from 13:57 to 16:30. The build commits run from 14:12 to 15:56.
 - Review on 2026-11-25: the 12 replies, the label corrections and the documents.
+- Tidying the text and adding screenshots on 2026-11-26, before the interview: plainer wording in the docs and the generated reports, the demo screenshots for steps 3 and 5, and my slide notes moved out of the repo. It took a little over ten minutes; the commits run from 11:03 to 11:05.
